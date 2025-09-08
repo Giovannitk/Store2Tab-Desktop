@@ -1,0 +1,239 @@
+﻿<UserControl x:Class="Store2Tab.Views.GestioneTipiPagamentoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#FF2D2D30">
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <!-- Lista sinistra -->
+            <ColumnDefinition Width="5"/>
+            <!-- Separatore -->
+            <ColumnDefinition Width="*"/>
+            <!-- Dettagli destra -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Pannello sinistro con lista -->
+        <GroupBox Grid.Column="0" Header="Lista Tipi di Pagamento" Style="{StaticResource ModernGroupBox}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Toolbar superiore -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                    <Button Content="F1-Nuovo" Style="{StaticResource ActionButtonStyle}" Click="Nuovo_Click"/>
+                    <Button Content="F2-Salva" Style="{StaticResource ActionButtonStyle}" Click="Salva_Click"/>
+                    <Button Content="F4-Cancella" Style="{StaticResource ActionButtonStyle}" Click="Cancella_Click"/>
+                    <Button Content="F8-Annulla" Style="{StaticResource ActionButtonStyle}" Click="Annulla_Click"/>
+                </StackPanel>
+
+                <!-- Ricerca -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBox x:Name="SearchTextBox" Style="{StaticResource ModernTextBox}" Width="200" 
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="F3-Cerca" Style="{StaticResource ActionButtonStyle}" Click="Cerca_Click"/>
+                </StackPanel>
+
+                <!-- Lista -->
+                <DataGrid Grid.Row="2" x:Name="TipiPagamentoDataGrid"
+                          AutoGenerateColumns="False"
+                          SelectedItem="{Binding SelectedTipoPagamento}"
+                          Background="#FF3F3F46"
+                          Foreground="White"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#FF434346"
+                          VerticalGridLinesBrush="Transparent"
+                          HeadersVisibility="Column"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          SelectionChanged="DataGrid_SelectionChanged">
+
+                    <DataGrid.Resources>
+                        <!-- Stile per gli headers delle colonne -->
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#FF007ACC"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="BorderBrush" Value="#FF434346"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        </Style>
+
+                        <!-- Stile per le righe -->
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="#FF3F3F46"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#FF007ACC"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF1177BB"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <!-- Stile per le celle -->
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="4,2"/>
+                            <Setter Property="FontSize" Value="11"/>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Codice" Binding="{Binding Codice}" Width="60"/>
+                        <DataGridTextColumn Header="Tipo di Pagamento (descrizione)" Binding="{Binding Descrizione}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </GroupBox>
+
+        <!-- Separatore verticale -->
+        <GridSplitter Grid.Column="1" Width="3" Background="#FF434346" 
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+        <!-- Pannello destro con dettagli -->
+        <Grid Grid.Column="2" Margin="5,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Dati principali -->
+            <GroupBox Grid.Row="0" Header="Dati Principali" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Prima riga -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Codice" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="CodiceTextBox" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedTipoPagamento.Codice}" Width="100" HorizontalAlignment="Left"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="ID" Style="{StaticResource ModernLabel}" Margin="20,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="3" x:Name="IdTextBox" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedTipoPagamento.ID}" Width="60" IsReadOnly="True"/>
+
+                    <!-- Seconda riga -->
+                    <CheckBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content="Incasso Immediato" 
+                              Style="{StaticResource ModernCheckBox}" Margin="0,10,0,0"
+                              IsChecked="{Binding SelectedTipoPagamento.IncassoImmediato}"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="FE import" Style="{StaticResource ModernLabel}" 
+                               Margin="0,10,0,0" HorizontalAlignment="Right"/>
+
+                    <!-- Terza riga -->
+                    <CheckBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Content="Pagamento Immediato" 
+                              Style="{StaticResource ModernCheckBox}" Margin="0,5,0,0"
+                              IsChecked="{Binding SelectedTipoPagamento.PagamentoImmediato}"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Mezzo di Pagamento -->
+            <GroupBox Grid.Row="1" Header="Mezzo di Pagamento" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Row="0" Grid.Column="0" Style="{StaticResource ModernComboBox}"
+                              SelectedItem="{Binding SelectedTipoPagamento.MezzoPagamento}">
+                        <ComboBoxItem Content="Bonifico Bancario"/>
+                        <ComboBoxItem Content="Contanti"/>
+                        <ComboBoxItem Content="Carta di Credito"/>
+                        <ComboBoxItem Content="Assegno"/>
+                    </ComboBox>
+
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Spese %" Style="{StaticResource ModernLabel}" Margin="10,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="2" Style="{StaticResource ModernTextBox}" Width="60"
+                             Text="{Binding SelectedTipoPagamento.SpesePercentuale}"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Sconto Cassa %" Style="{StaticResource ModernLabel}" Margin="10,10,5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernTextBox}" Width="60" Margin="0,10,0,0"
+                             Text="{Binding SelectedTipoPagamento.ScontoCassaPercentuale}"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Scadenze -->
+            <GroupBox Grid.Row="2" Header="SCADENZE" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Prima riga header -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Rata Numero" Style="{StaticResource ModernLabel}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Inizio Scadenza gg" Style="{StaticResource ModernLabel}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Fine Mese" Style="{StaticResource ModernLabel}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Data Documento" Style="{StaticResource ModernLabel}"/>
+
+                    <!-- Seconda riga valori -->
+                    <TextBox Grid.Row="1" Grid.Column="0" Style="{StaticResource ModernTextBox}" Width="50" Text="1"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="60" Text="60" Margin="5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ModernTextBox}" Width="30" Text="Si" Margin="5,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernTextBox}" Margin="5,0,0,0"/>
+
+                    <!-- Terza riga controlli aggiuntivi -->
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
+                        <TextBlock Text="Rata Numero" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Width="50" Text="1" Margin="5,0"/>
+                        <TextBlock Text="Inizio Scadenza" Style="{StaticResource ModernLabel}" Margin="10,0,5,0"/>
+                        <TextBox Style="{StaticResource ModernTextBox}" Width="60" Text="60" Margin="0,0,5,0"/>
+                        <TextBlock Text="gg (x30=fine mese)" Style="{StaticResource ModernLabel}"/>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <!-- Tipo Scadenza -->
+            <GroupBox Grid.Row="3" Header="Tipo di Scadenza" Style="{StaticResource ModernGroupBox}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <CheckBox Content="Fine Mese" Style="{StaticResource ModernCheckBox}" Margin="0,0,20,0"/>
+                        <CheckBox Content="Data Documento" Style="{StaticResource ModernCheckBox}"/>
+                    </StackPanel>
+
+                    <!-- Pulsanti azione inferiori -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <Button Content="Nuovo" Style="{StaticResource ActionButtonStyle}" Margin="5"/>
+                        <Button Content="Salva" Style="{StaticResource ActionButtonStyle}" Margin="5"/>
+                        <Button Content="Cancella" Style="{StaticResource ActionButtonStyle}" Margin="5"/>
+                        <Button Content="Annulla" Style="{StaticResource ActionButtonStyle}" Margin="5"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

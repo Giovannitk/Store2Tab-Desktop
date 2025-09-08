@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="Store2Tab.Views.MenuPrincipaleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="400" Width="600">
+    <Grid>
+        <TextBlock Text="Menu Principale pssTab"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="20"
+                   Foreground="Gray"
+                   FontWeight="Bold"/>
+    </Grid>
+</UserControl>

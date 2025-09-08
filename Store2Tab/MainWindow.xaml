@@ -1,0 +1,99 @@
+﻿<Window x:Class="Store2Tab.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="STORE sql ⇒ TABELLE" Height="600" Width="900"
+        Background="#FF2D2D30">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/SharedStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Menu superiore -->
+            <RowDefinition Height="*"/>
+            <!-- Contenuto principale -->
+        </Grid.RowDefinitions>
+
+        <!-- Menu superiore -->
+        <Menu Grid.Row="0" Background="#FF3F3F46" Foreground="White" Height="25">
+            <MenuItem Header="ANAGRAFICHE" Click="Menu_Click" Tag="ANAGRAFICHE"/>
+            <MenuItem Header="DOCUMENTI" Click="Menu_Click" Tag="DOCUMENTI"/>
+            <MenuItem Header="BANCHE" Click="Menu_Click" Tag="BANCHE"/>
+            <MenuItem Header="ARTICOLI" Click="Menu_Click" Tag="ARTICOLI"/>
+            <MenuItem Header="CAUSALI IVA" Click="Menu_Click" Tag="CAUSALIIVA"/>
+            <MenuItem Header="CONTABILITA'" Click="Menu_Click" Tag="CONTABILITA"/>
+            <MenuItem Header="PAGAMENTI" Click="Menu_Click" Tag="PAGAMENTI"/>
+            <MenuItem Header="VARIE" Click="Menu_Click" Tag="VARIE"/>
+        </Menu>
+
+        <!-- Contenuto principale con TabControl -->
+        <TabControl x:Name="MainTabControl" Grid.Row="1" 
+                    Background="#FF2D2D30" 
+                    BorderBrush="#FF434346"
+                    BorderThickness="1">
+
+            <TabControl.Resources>
+                <!-- Stile per i Tab Headers -->
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="#FF3F3F46"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="#FF434346"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Padding" Value="12,8"/>
+                    <Setter Property="Margin" Value="0,0,2,0"/>
+                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="Border"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="3,3,0,0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      ContentSource="Header"
+                                                      Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#FF007ACC"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#FF1177BB"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- Tab Welcome (mostrato all'avvio) -->
+            <TabItem x:Name="WelcomeTab" Header="Menu Principale" IsSelected="True">
+                <Grid Background="#FF2D2D30">
+                    <TextBlock Text="STORE sql ⇒ TABELLE"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="24"
+                               Foreground="#FFCCCCCC"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="Seleziona una categoria dal menu superiore per iniziare"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0,60,0,0"
+                               FontSize="14"
+                               Foreground="#FF999999"/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
