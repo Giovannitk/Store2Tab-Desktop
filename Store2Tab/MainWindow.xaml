@@ -22,14 +22,52 @@
 
         <!-- Menu superiore -->
         <Menu Grid.Row="0" Background="#FF3F3F46" Foreground="White" Height="25">
-            <MenuItem Header="ANAGRAFICHE" Click="Menu_Click" Tag="ANAGRAFICHE"/>
-            <MenuItem Header="DOCUMENTI" Click="Menu_Click" Tag="DOCUMENTI"/>
+            <MenuItem Header="ANAGRAFICHE" Click="Menu_Click" Tag="ANAGRAFICHE">
+                <MenuItem Header="Tipi di Attività" Click="Menu_Click" Tag="TIPIATTIVITA" Foreground="Black"/>
+            </MenuItem>
+
+            <MenuItem Header="DOCUMENTI">
+                <MenuItem Header="Emessi" Foreground="Black">
+                    <MenuItem Header="Numerazione" Click="Menu_Click" Tag="NUMERAZIONE" Foreground="Black"/>
+                </MenuItem>
+                <MenuItem Header="Scheda di Trasporto" Click="Menu_Click" Tag="SCHEDATRASPORTO" Foreground="Black"/>
+                <MenuItem Header="Ordini" Foreground="Black">
+                    <MenuItem Header="NumerazioneOrdini" Click="Menu_Click" Tag="NUMERAZIONEORDINI" Foreground="Black"/>
+                </MenuItem>
+                <MenuItem Header="Note Predefinite" Click="Menu_Click" Tag="NOTEPREDEFINITE" Foreground="Black"/>
+                <MenuItem Header="Protocolli" Click="Menu_Click" Tag="PROTOCOLLI" Foreground="Black"/>
+                <MenuItem Header="Protocolli Contatori" Click="Menu_Click" Tag="PROTOCOLLICONTATORI" Foreground="Black"/>
+            </MenuItem>
+
             <MenuItem Header="BANCHE" Click="Menu_Click" Tag="BANCHE"/>
-            <MenuItem Header="ARTICOLI" Click="Menu_Click" Tag="ARTICOLI"/>
+
+            <MenuItem Header="ARTICOLI" Tag="ARTICOLI">
+                <MenuItem Header="Depositi" Click="Menu_Click" Tag="DEPOSITI" Foreground="Black"/>
+                <MenuItem Header="Componenti" Click="Menu_Click" Tag="COMPONENTI" Foreground="Black"/>
+            </MenuItem>
+
             <MenuItem Header="CAUSALI IVA" Click="Menu_Click" Tag="CAUSALIIVA"/>
-            <MenuItem Header="CONTABILITA'" Click="Menu_Click" Tag="CONTABILITA"/>
-            <MenuItem Header="PAGAMENTI" Click="Menu_Click" Tag="PAGAMENTI"/>
-            <MenuItem Header="VARIE" Click="Menu_Click" Tag="VARIE"/>
+
+            <MenuItem Header="CONTABILITA'">
+                <MenuItem Header="Causali Movimento" Click="Menu_Click" Tag="CAUSALIMOVIMENTO" Foreground="Black"/>
+            </MenuItem>
+
+            <MenuItem Header="PAGAMENTI">
+                <MenuItem Header="Tipi Pagamento" Click="Menu_Click" Tag="PAGAMENTI" Foreground="Black"/>
+                <MenuItem Header="Mezzi di Pagamento" Click="Menu_Click" Tag="MEZZIPAGAMENTO" Foreground="Black"/>
+            </MenuItem>
+
+            <!-- VARIE con sottomenu -->
+            <MenuItem Header="VARIE">
+                <MenuItem Header="Vettori" Click="Menu_Click" Tag="VETTORI" Foreground="Black"/>
+                <MenuItem Header="Vivai" Foreground="Black">
+                    <MenuItem Header="Passaporto Piante CEE Tipo" Click="Menu_Click" Tag="PASSAPORTOCEETIPO" Foreground="Black"/>
+                    <MenuItem Header="Passaporto Piante CEE Numerazioni" Click="Menu_Click" Tag="PASSAPORTOCOENUMERAZIONI" Foreground="Black"/>
+                    <MenuItem Header="Specie Botaniche" Click="Menu_Click" Tag="SPECIEBOTANICHE" Foreground="Black"/>
+                    <MenuItem Header="Varietà" Click="Menu_Click" Tag="VARIETA" Foreground="Black"/>
+                    <MenuItem Header="Portinnesto" Click="Menu_Click" Tag="PORTINNESTO" Foreground="Black"/>
+                </MenuItem>
+            </MenuItem>
         </Menu>
 
         <!-- Contenuto principale con TabControl -->
@@ -74,6 +112,19 @@
                         </Setter.Value>
                     </Setter>
                 </Style>
+
+                <!-- DataTemplate per il pulsante di chiusura dei Tab -->
+                <DataTemplate x:Key="ClosableTabHeaderTemplate">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding}" Margin="0,0,5,0"/>
+                        <Button Content="X"
+                        Width="16" Height="16"
+                        Padding="0"
+                        Margin="5,0,0,0"
+                        Click="CloseTab_Click"
+                        Tag="{Binding RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                    </StackPanel>
+                </DataTemplate>
             </TabControl.Resources>
 
             <!-- Tab Welcome (mostrato all'avvio) -->

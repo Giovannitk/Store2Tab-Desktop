@@ -1,0 +1,217 @@
+﻿<UserControl x:Class="Store2Tab.Views.GestioneBancheView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#FF2D2D30">
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <!-- Lista sinistra -->
+            <ColumnDefinition Width="5"/>
+            <!-- Separatore -->
+            <ColumnDefinition Width="*"/>
+            <!-- Dettagli destra -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Pannello sinistro con lista -->
+        <GroupBox Grid.Column="0" Header="Lista Banche" Style="{StaticResource ModernGroupBox}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Toolbar superiore -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                    <Button Content="F1-Nuovo" Style="{StaticResource ActionButtonStyle}" Click="Nuovo_Click"/>
+                    <Button Content="F2-Salva" Style="{StaticResource ActionButtonStyle}" Click="Salva_Click"/>
+                    <Button Content="F4-Cancella" Style="{StaticResource ActionButtonStyle}" Click="Cancella_Click"/>
+                    <Button Content="F8-Annulla" Style="{StaticResource ActionButtonStyle}" Click="Annulla_Click"/>
+                </StackPanel>
+
+                <!-- Ricerca -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBox x:Name="SearchTextBox" Style="{StaticResource ModernTextBox}" Width="200" 
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="F3-Cerca" Style="{StaticResource ActionButtonStyle}" Click="Cerca_Click"/>
+                </StackPanel>
+
+                <!-- Lista -->
+                <DataGrid Grid.Row="2" x:Name="BancheDataGrid"
+                          AutoGenerateColumns="False"
+                          SelectedItem="{Binding SelectedBanca}"
+                          Background="#FF3F3F46"
+                          Foreground="White"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#FF434346"
+                          VerticalGridLinesBrush="Transparent"
+                          HeadersVisibility="Column"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          SelectionChanged="DataGrid_SelectionChanged">
+
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#FF007ACC"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="BorderBrush" Value="#FF434346"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        </Style>
+
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="#FF3F3F46"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#FF007ACC"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF1177BB"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="4,2"/>
+                            <Setter Property="FontSize" Value="11"/>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Codice" Binding="{Binding Codice}" Width="60"/>
+                        <DataGridTextColumn Header="Banca (denominazione)" Binding="{Binding Denominazione}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </GroupBox>
+
+        <!-- Separatore verticale -->
+        <GridSplitter Grid.Column="1" Width="3" Background="#FF434346" 
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+        <!-- Pannello destro con dettagli -->
+        <Grid Grid.Column="2" Margin="5,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Dati principali -->
+            <GroupBox Grid.Row="0" Header="Dati Principali" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="60"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Prima riga -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Codice" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.Codice}" Margin="0,0,10,0"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="ID" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="3" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.ID}" IsReadOnly="True"/>
+
+                    <!-- Seconda riga -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Banca (denominazione)" Style="{StaticResource ModernLabel}" Margin="0,10,0,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.Denominazione}" Margin="0,10,0,0"/>
+
+                    <!-- Terza riga -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Agenzia" Style="{StaticResource ModernLabel}" Margin="0,10,0,0"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.Agenzia}" Margin="0,10,0,0"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Codici bancari -->
+            <GroupBox Grid.Row="1" Header="Codici Bancari" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Prima riga -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ABI" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.ABI}" Margin="0,0,10,0"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="CAB" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="3" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.CAB}"/>
+
+                    <!-- Seconda riga -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CC" Style="{StaticResource ModernLabel}" Margin="0,10,0,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.CC}" Margin="0,10,10,0"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="CIN" Style="{StaticResource ModernLabel}" Margin="0,10,0,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.CIN}" Margin="0,10,0,0"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- IBAN e SWIFT -->
+            <GroupBox Grid.Row="2" Header="Codici Internazionali" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- IBAN -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="IBAN" Style="{StaticResource ModernLabel}"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.IBAN}" Margin="0,0,10,0"/>
+
+                    <!-- SWIFT -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="SWIFT" Style="{StaticResource ModernLabel}" Margin="0,10,0,0"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding SelectedBanca.SWIFT}" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+
+                    <CheckBox Grid.Row="1" Grid.Column="2" Content="Predefinita" 
+                              Style="{StaticResource ModernCheckBox}" 
+                              IsChecked="{Binding SelectedBanca.Predefinita}" Margin="0,10,0,0"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Note Interne -->
+            <GroupBox Grid.Row="3" Header="Note Interne" Style="{StaticResource ModernGroupBox}">
+                <TextBox Style="{StaticResource ModernTextBox}" 
+                         Text="{Binding SelectedBanca.NoteInterne}" 
+                         AcceptsReturn="True" 
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         MinHeight="80"/>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

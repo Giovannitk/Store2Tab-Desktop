@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="Store2Tab.Views.GestioneVettoriView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#FF2D2D30">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Ricerca -->
+            <RowDefinition Height="*"/>
+            <!-- Dettagli -->
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="F1-Nuovo" Style="{StaticResource ActionButtonStyle}" Click="Nuovo_Click"/>
+            <Button Content="F2-Salva" Style="{StaticResource ActionButtonStyle}" Click="Salva_Click"/>
+            <Button Content="F4-Cancella" Style="{StaticResource ActionButtonStyle}" Click="Cancella_Click"/>
+            <Button Content="F8-Annulla" Style="{StaticResource ActionButtonStyle}" Click="Annulla_Click"/>
+        </StackPanel>
+
+        <!-- Barra di ricerca -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBox Width="250" Style="{StaticResource ModernTextBox}" />
+            <Button Content="F3-Cerca" Style="{StaticResource ActionButtonStyle}" Click="Cerca_Click"/>
+        </StackPanel>
+
+        <!-- Dettagli -->
+        <ScrollViewer Grid.Row="2">
+            <StackPanel>
+                <GroupBox Header="Dati Vettore" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Prima riga -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Codice:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="120"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="ID:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="0" Grid.Column="3" Style="{StaticResource ModernTextBox}" Width="120"/>
+
+                        <!-- Seconda riga -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Codice Paese:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="120"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Coeff. Conferimento:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="1" Grid.Column="3" Style="{StaticResource ModernTextBox}" Width="120"/>
+
+                        <!-- Terza riga -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Vettore (denominazione):" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ModernTextBox}"/>
+
+                        <!-- Quarta riga -->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Indirizzo:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource ModernTextBox}"/>
+
+                        <!-- Quinta riga -->
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="CAP:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="80"/>
+                        <TextBlock Grid.Row="4" Grid.Column="2" Text="Città:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="4" Grid.Column="3" Style="{StaticResource ModernTextBox}" Width="150"/>
+
+                        <!-- Sesta riga -->
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Prov.:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="50"/>
+
+                        <!-- Settima riga -->
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Partita IVA:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="6" Grid.Column="1" Style="{StaticResource ModernTextBox}" Width="150"/>
+                        <TextBlock Grid.Row="6" Grid.Column="2" Text="Codice Fiscale:" Style="{StaticResource ModernLabel}"/>
+                        <TextBox Grid.Row="6" Grid.Column="3" Style="{StaticResource ModernTextBox}" Width="150"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Recapiti per Scheda di Trasporto" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                    <TextBox Height="60" Style="{StaticResource ModernTextBox}" AcceptsReturn="True" TextWrapping="Wrap"/>
+                </GroupBox>
+
+                <GroupBox Header="Recapiti" Style="{StaticResource ModernGroupBox}" Margin="0,0,0,10">
+                    <TextBox Height="60" Style="{StaticResource ModernTextBox}" AcceptsReturn="True" TextWrapping="Wrap"/>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

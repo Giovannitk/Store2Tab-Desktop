@@ -12,7 +12,12 @@ namespace Store2Tab
             // esempio: pssTab.exe TIPOPAGAMENTO
             if (e.Args.Length > 0)
             {
-                // Pulisce il parametro rimuovendo eventuali caratteri extra
+                //var listaArgs = string.Join("#/#", e.Args);
+                //foreach (var arg in e.Args)
+                //{
+                //    MessageBox.Show($"Argomento: {arg}");
+                //}
+                // Viene pulito il parametro rimuovendo eventuali caratteri extra
                 TipoParametro = e.Args[0].Replace("#/#", "").Trim();
             }
             else
@@ -20,7 +25,7 @@ namespace Store2Tab
                 TipoParametro = null;
             }
 
-            MessageBox.Show($"Parametro passato: {TipoParametro}");
+            //MessageBox.Show($"Parametro passato: {TipoParametro}");
 
             var mainWindow = new MainWindow();
             mainWindow.ShowWithParam(TipoParametro);

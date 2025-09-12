@@ -1,0 +1,118 @@
+﻿<UserControl x:Class="Store2Tab.Views.GestioneComponentiView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Store2Tab.Views">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/SharedStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="#FF2D2D30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Filtri ricerca -->
+            <RowDefinition Height="*"/>
+            <!-- Contenuto principale -->
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar con pulsanti -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="35">
+            <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
+                    Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
+                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
+                    Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
+                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+        </StackPanel>
+
+        <!-- Sezione filtri ricerca -->
+        <Grid Grid.Row="1" Background="#FF3F3F46" Height="35">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="codice" Foreground="White" 
+                       VerticalAlignment="Center" Margin="10,0,5,0"/>
+            <TextBox Grid.Column="1" Name="CodiceRicercaTextBox" Height="23" 
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+
+            <TextBlock Grid.Column="2" Text="descrizione" Foreground="White" 
+                       VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBox Grid.Column="3" Name="DescrizioneRicercaTextBox" Height="23" 
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+
+            <Button Grid.Column="5" Name="CercaButton" Content="F3-Cerca" Width="80" 
+                    Margin="10,6" Click="Cerca_Click" Style="{StaticResource ModernButton}"/>
+        </Grid>
+
+        <!-- Contenuto principale -->
+        <Grid Grid.Row="2" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- DataGrid componenti (sinistra) -->
+            <DataGrid Grid.Column="0" Name="ComponentiDataGrid" 
+                      AutoGenerateColumns="False" CanUserAddRows="False"
+                      Background="#FF3F3F46" Foreground="White" 
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                      BorderBrush="#FF434346" BorderThickness="1"
+                      SelectionChanged="DataGrid_SelectionChanged"
+                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30">
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#FF434346"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Height" Value="25"/>
+                        <Setter Property="Padding" Value="5,0"/>
+                        <Setter Property="BorderBrush" Value="#FF666666"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Componente (descrizione)" 
+                                        Binding="{Binding Descrizione}" Width="*"/>
+                </DataGrid.Columns>
+
+                <DataGrid.Items>
+                </DataGrid.Items>
+            </DataGrid>
+
+            <!-- Pannello dettagli (destra) -->
+            <StackPanel Grid.Column="1" Margin="15,0,0,0">
+
+                <!-- Codice -->
+                <GroupBox Header="Codice" Style="{StaticResource ModernGroupBox}" 
+                          Height="70" Margin="0,0,0,15">
+                    <TextBox Name="CodiceTextBox" Height="25" Width="150" 
+                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                             Style="{StaticResource ModernTextBox}"/>
+                </GroupBox>
+
+                <!-- Componente (descrizione) -->
+                <GroupBox Header="Componente (descrizione)" Style="{StaticResource ModernGroupBox}" 
+                          Height="Auto" Margin="0,0,0,15">
+                    <TextBox Name="ComponenteDescrizioneTextBox" Height="150" Width="Auto" 
+                             VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                </GroupBox>
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
