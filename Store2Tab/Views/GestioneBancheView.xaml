@@ -3,6 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#FF2D2D30">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Stile per il testo di info selezione -->
+        <Style x:Key="SelectionInfoStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFFF9500"/>
+            <Setter Property="Margin" Value="5,2"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
@@ -32,24 +44,37 @@
 
                 <!-- Ricerca -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,5">
-                    <TextBox x:Name="SearchTextBox" Style="{StaticResource ModernTextBox}" Width="200" 
+                    <TextBox x:Name="SearchTextBox" Style="{StaticResource ModernTextBox}" Width="188" 
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button Content="F3-Cerca" Style="{StaticResource ActionButtonStyle}" Click="Cerca_Click"/>
                 </StackPanel>
 
+                <!-- Indicatore selezione -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,5" 
+            Visibility="{Binding HasMultipleSelection, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding SelectionInfo}" 
+               Style="{StaticResource ModernLabel}" 
+               Foreground="#FFFF9500" 
+               FontWeight="Bold"/>
+                </StackPanel>
+
                 <!-- Lista -->
+                <!-- Store2Tab/Views/GestioneBancheView.xaml SEZIONE MODIFICATA PER SELEZIONE MULTIPLA -->
                 <DataGrid Grid.Row="2" x:Name="BancheDataGrid"
-                          AutoGenerateColumns="False"
-                          SelectedItem="{Binding SelectedBanca}"
-                          Background="#FF3F3F46"
-                          Foreground="White"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="#FF434346"
-                          VerticalGridLinesBrush="Transparent"
-                          HeadersVisibility="Column"
-                          CanUserReorderColumns="False"
-                          CanUserResizeRows="False"
-                          SelectionChanged="DataGrid_SelectionChanged">
+          AutoGenerateColumns="False"
+          ItemsSource="{Binding Banche}"
+          SelectedItem="{Binding SelectedBanca}"
+          SelectionMode="Extended"
+          SelectionUnit="FullRow"
+          Background="#FF3F3F46"
+          Foreground="White"
+          GridLinesVisibility="Horizontal"
+          HorizontalGridLinesBrush="#FF434346"
+          VerticalGridLinesBrush="Transparent"
+          HeadersVisibility="Column"
+          CanUserReorderColumns="False"
+          CanUserResizeRows="False"
+          SelectionChanged="DataGrid_SelectionChanged">
 
                     <DataGrid.Resources>
                         <Style TargetType="DataGridColumnHeader">
@@ -95,7 +120,8 @@
                       HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
         <!-- Pannello destro con dettagli -->
-        <Grid Grid.Column="2" Margin="5,0,0,0">
+        <ScrollViewer Grid.Column="2" Margin="5,0,0,0" VerticalScrollBarVisibility="Auto">
+            <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -213,5 +239,6 @@
                          MinHeight="80"/>
             </GroupBox>
         </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>
