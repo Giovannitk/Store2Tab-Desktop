@@ -10,11 +10,13 @@ namespace Store2Tab.Data
         }
 
         public DbSet<Banca> Banche { get; set; }
+        public DbSet<CausaleMovimento> CausaliMovimento { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            #region Banche
             // Configurazione esplicita per Banca
             modelBuilder.Entity<Banca>(entity =>
             {
@@ -94,6 +96,47 @@ namespace Store2Tab.Data
                 // Configura il nome della tabella
                 entity.ToTable("TBanca");
             });
+            #endregion
+
+            #region CausaliMovimento
+            // Configurazione per CausaleMovimento
+            modelBuilder.Entity<CausaleMovimento>(entity =>
+            {
+                // Configura la chiave primaria
+                entity.HasKey(e => e.Codice);
+
+                // Configura le proprietà
+                entity.Property(e => e.Codice)
+                    .IsRequired()
+                    .HasMaxLength(4)
+                    .HasColumnName("IdContCausale");
+
+                entity.Property(e => e.Descrizione)
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasDefaultValue("")
+                    .HasColumnName("ContCausale");
+
+                entity.Property(e => e.CodiceControMovimento)
+                    .HasMaxLength(4)
+                    .HasDefaultValue("")
+                    .HasColumnName("IdContCausaleContro");
+
+                entity.Property(e => e.Utilizzabile)
+                    .IsRequired()
+                    .HasDefaultValue((byte)1)
+                    .HasColumnName("Utilizzabile");
+
+                // Configura la relazione auto-referenziale per il contro movimento
+                entity.HasOne(e => e.ControMovimento)
+                    .WithMany()
+                    .HasForeignKey(e => e.CodiceControMovimento)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // Configura il nome della tabella
+                entity.ToTable("TContCausale");
+            });
+            #endregion
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

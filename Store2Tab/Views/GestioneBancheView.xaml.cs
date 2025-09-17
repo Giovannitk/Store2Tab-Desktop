@@ -43,8 +43,8 @@ namespace Store2Tab.Views
         {
             if (DataContext is BancheViewModel viewModel)
             {
-                // Ottiene gli elementi selezionati
-                var elementiSelezionati = BancheDataGrid.SelectedItems.Cast<Banca>().ToList();
+                // Ottiene gli elementi selezionati in modo sicuro
+                var elementiSelezionati = GetSelectedBanche();
 
                 if (elementiSelezionati.Count == 0)
                 {
@@ -62,7 +62,7 @@ namespace Store2Tab.Views
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        viewModel.CancellaBancaSingola(elementiSelezionati[0]);
+                        _ = viewModel.CancellaBancaSingola(elementiSelezionati[0]);
                     }
                 }
                 else
@@ -102,7 +102,7 @@ namespace Store2Tab.Views
             // Aggiorna il ViewModel con le selezioni multiple
             if (DataContext is BancheViewModel viewModel)
             {
-                var elementiSelezionati = BancheDataGrid.SelectedItems.Cast<Banca>().ToList();
+                var elementiSelezionati = GetSelectedBanche();
                 viewModel.ElementiSelezionati = elementiSelezionati;
 
                 // Mantiene il comportamento della selezione singola per il binding
@@ -116,6 +116,33 @@ namespace Store2Tab.Views
                 }
                 // Per selezione multipla, SelectedBanca rimane quello che è
             }
+        }
+
+        /// <summary>
+        /// Metodo helper per ottenere in modo sicuro gli elementi selezionati dal DataGrid.
+        /// Risolto in questo modo l'errore MS.Internal.NamedObject, che è un problema comune 
+        /// con il DataGrid di WPF. Questo oggetto interno viene creato quando il DataGrid 
+        /// non riesce a risolvere correttamente il binding o quando ci sono elementi 
+        /// "placeholder" nella collezione.
+        /// </summary>
+        /// <returns>Lista delle banche selezionate, filtrando gli oggetti interni di WPF</returns>
+        private List<Banca> GetSelectedBanche()
+        {
+            var result = new List<Banca>();
+
+            if (BancheDataGrid.SelectedItems != null)
+            {
+                foreach (var item in BancheDataGrid.SelectedItems)
+                {
+                    // Filtra solo gli oggetti di tipo Banca, escludendo MS.Internal.NamedObject e altri tipi interni
+                    if (item is Banca banca)
+                    {
+                        result.Add(banca);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

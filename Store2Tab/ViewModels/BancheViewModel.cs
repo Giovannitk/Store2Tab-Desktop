@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using Store2Tab.Core.Services.Interfaces;
 using Store2Tab.Data.Models;
 
@@ -24,8 +25,11 @@ namespace Store2Tab.ViewModels
         {
             _bancaService = bancaService;
             _banche = new ObservableCollection<Banca>();
+            InitializeCommands();
             _ = LoadBancheAsync(); // Fire and forget per il caricamento iniziale
         }
+
+        #region Properties
 
         public ObservableCollection<Banca> Banche
         {
@@ -44,6 +48,8 @@ namespace Store2Tab.ViewModels
             {
                 _selectedBanca = value;
                 OnPropertyChanged();
+                // Aggiorna lo stato dei comandi quando cambia la selezione
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -64,6 +70,8 @@ namespace Store2Tab.ViewModels
             {
                 _isLoading = value;
                 OnPropertyChanged();
+                // Aggiorna lo stato dei comandi quando cambia il loading
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -78,6 +86,8 @@ namespace Store2Tab.ViewModels
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(HasMultipleSelection));
                 OnPropertyChanged(nameof(SelectionInfo));
+                // Aggiorna lo stato dei comandi quando cambia la selezione multipla
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -93,7 +103,49 @@ namespace Store2Tab.ViewModels
             }
         }
 
-        public async void NuovaBanca()
+        #endregion
+
+        #region Commands
+
+        public ICommand NuovoCommand { get; private set; }
+        public ICommand SalvaCommand { get; private set; }
+        public ICommand CancellaCommand { get; private set; }
+        public ICommand AnnullaCommand { get; private set; }
+        public ICommand CercaCommand { get; private set; }
+
+        private void InitializeCommands()
+        {
+            NuovoCommand = new RelayCommand(
+                execute: _ => NuovaBanca(),
+                canExecute: _ => !IsLoading
+            );
+
+            SalvaCommand = new RelayCommand(
+                execute: _ => SalvaBanca(),
+                canExecute: _ => !IsLoading && SelectedBanca != null
+            );
+
+            CancellaCommand = new RelayCommand(
+                execute: _ => CancellaBanca(),
+                canExecute: _ => !IsLoading && SelectedBanca?.ID > 0
+            );
+
+            AnnullaCommand = new RelayCommand(
+                execute: _ => AnnullaModifiche(),
+                canExecute: _ => !IsLoading && SelectedBanca != null
+            );
+
+            CercaCommand = new RelayCommand(
+                execute: _ => CercaBanche(),
+                canExecute: _ => !IsLoading
+            );
+        }
+
+        #endregion
+
+        #region Metodi esistenti
+
+        public void NuovaBanca()
         {
             try
             {
@@ -166,7 +218,6 @@ namespace Store2Tab.ViewModels
                 MessageBox.Show(ex.Message, "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         public async Task CancellaBancaSingola(Banca banca)
         {
@@ -269,7 +320,7 @@ namespace Store2Tab.ViewModels
 
                 // Rimuove le banche cancellate dalla collezione
                 foreach (var banca in bancheCancellate)
-        {
+                {
                     Banche.Remove(banca);
                 }
 
@@ -398,11 +449,49 @@ namespace Store2Tab.ViewModels
             }
         }
 
+        #endregion
+
+        #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        #endregion
     }
+
+    #region RelayCommand Helper Class
+
+    public class RelayCommand : ICommand
+    {
+        private readonly Action<object?> _execute;
+        private readonly Predicate<object?>? _canExecute;
+
+        public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+
+        public bool CanExecute(object? parameter)
+        {
+            return _canExecute?.Invoke(parameter) ?? true;
+        }
+
+        public void Execute(object? parameter)
+        {
+            _execute(parameter);
+        }
+
+        public event EventHandler? CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+    }
+
+    #endregion
 }

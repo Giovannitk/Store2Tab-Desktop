@@ -19,8 +19,8 @@ namespace Store2Tab
             // Prima prova a leggere da configurazioni salvate dall'utente
             var connectionString = GetConnectionStringFromUserSettings() ?? GetDefaultConnectionString();
 
-            // Entity Framework
-            services.AddDbContext<AppDbContext>(options =>
+            // Entity Framework (use factory for WPF to avoid DbContext concurrency)
+            services.AddDbContextFactory<AppDbContext>(options =>
             {
                 options.UseSqlServer(connectionString);
 
@@ -36,9 +36,12 @@ namespace Store2Tab
 
             // Business Services
             services.AddScoped<IBancaService, BancaService>();
+            services.AddScoped<ICausaleMovimentoService, CausaleMovimentoService>();
 
             // ViewModels
             services.AddTransient<ViewModels.BancheViewModel>();
+            services.AddTransient<ViewModels.CausaliMovimentoViewModel>();
+            services.AddTransient<ViewModels.CausaleMovimentoSelectionViewModel>();
 
             return services.BuildServiceProvider();
         }
