@@ -1,12 +1,15 @@
 ﻿<UserControl x:Class="Store2Tab.Views.GestioneMezziPagamentoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Store2Tab.ViewModels"
+             xmlns:conv="clr-namespace:Store2Tab.Converters">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/SharedStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <conv:BoolToByteConverter x:Key="BoolToByteConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -23,15 +26,32 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar con pulsanti -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="45">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
             <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
                     Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
                     Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
                     Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <!-- Nuovo pulsante per cancellazione multipla -->
+            <Button Name="CancellaMultiplaButton" Content="F5-Canc.Mult." Width="100" Margin="5,3" 
+                    Click="CancellaMultipla_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
                     Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+
+            <Grid Width="Auto" Height="Auto">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Seleziona tutto -->
+                    <RowDefinition Height="*"/>
+                    <!-- Deseleziona tutto -->
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0" Name="SelezionaTuttoButton" Content="Seleziona Tutto" Width="100" Height="20" 
+                        Margin="5,3" Click="SelectAll_Click" Style="{StaticResource ActionButtonStyle}"/>
+                <Button Grid.Row="1" Name="DeselezionaTuttoButton" Content="Deseleziona Tutto" Width="100" Height="20"
+                        Margin="5,3" Click="UnselectAll_Click" Style="{StaticResource ActionButtonStyle}"/>
+            </Grid>
         </StackPanel>
 
         <!-- Sezione filtri ricerca -->
@@ -48,12 +68,14 @@
             <TextBlock Grid.Column="0" Text="codice" Foreground="White" 
                        VerticalAlignment="Center" Margin="10,0,5,0"/>
             <TextBox Grid.Column="1" Name="CodiceRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroCodice, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBlock Grid.Column="2" Text="descrizione" Foreground="White" 
                        VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox Grid.Column="3" Name="DescrizioneRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroDescrizione, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Button Grid.Column="5" Name="CercaButton" Content="F3-Cerca" Width="80" 
                     Margin="10,0" Click="Cerca_Click" Style="{StaticResource ModernButton}"/>
@@ -68,20 +90,62 @@
 
             <GroupBox Grid.Column="0" Header="Mezzo di Pagamento (descrizione)" 
                       Style="{StaticResource ModernGroupBox}">
-                <ListBox Name="MezziPagamentoListBox" Background="#FF3F3F46" 
-                         Foreground="White" BorderBrush="#FF434346"
-                         SelectionChanged="ListBox_SelectionChanged">
-                    <ListBox.Items>
-                        <!-- Dati di esempio - sostituire con binding -->
-                        <ListBoxItem Content="Assegno"/>
-                        <ListBoxItem Content="Bonifico Bancario"/>
-                        <ListBoxItem Content="Contanti"/>
-                        <ListBoxItem Content="Contrassegno"/>
-                        <ListBoxItem Content="Finanziaria"/>
-                        <ListBoxItem Content="R.I.D."/>
-                        <ListBoxItem Content="Ricevuta Bancaria"/>
-                    </ListBox.Items>
-                </ListBox>
+                <!-- MODIFICATO: Cambiato ListBox in DataGrid per supportare selezione multipla -->
+                <DataGrid Name="MezziPagamentoDataGrid" 
+                          Background="#FF3F3F46" 
+                          Foreground="White" 
+                          BorderBrush="#FF434346"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#FF5A5A5A"
+                          RowBackground="#FF3F3F46"
+                          AlternatingRowBackground="#FF484850"
+                          HeadersVisibility="Column"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          SelectionMode="Extended"
+                          ItemsSource="{Binding Mezzi}"
+                          SelectedItem="{Binding MezzoSelezionato, Mode=TwoWay}"
+                          SelectionChanged="MezziPagamentoDataGrid_SelectionChanged">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Cod." 
+                                           Binding="{Binding IdPagamentoMezzo}" 
+                                           Width="50" 
+                                           IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Descrizione" 
+                                           Binding="{Binding pagamentoMezzo}" 
+                                           Width="*" 
+                                           IsReadOnly="True"/>
+                    </DataGrid.Columns>
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#FF2D2D30"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="BorderBrush" Value="#FF5A5A5A"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="5"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#FF007ACC"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                </DataGrid>
             </GroupBox>
 
             <!-- Pannello dettagli (destra) -->
@@ -90,7 +154,10 @@
                 <GroupBox Header="Codice" Style="{StaticResource ModernGroupBox}" 
                           Height="Auto" Margin="0,0,0,10">
                     <TextBox Name="CodiceTextBox" Height="23" Width="80" 
-                             HorizontalAlignment="Left" Style="{StaticResource ModernTextBox}"/>
+                             HorizontalAlignment="Left" Style="{StaticResource ModernTextBox}"
+                             MaxLength="4"
+                             Text="{Binding CodiceProposto, Mode=OneWay}"
+                             IsReadOnly="True"/>
                 </GroupBox>
 
                 <!-- Mezzo di Pagamento (descrizione) -->
@@ -98,7 +165,8 @@
                           Style="{StaticResource ModernGroupBox}" 
                           Height="Auto" Margin="0,0,0,10">
                     <TextBox Name="DescrizioneMezzoPagamentoTextBox" Height="23" 
-                             Style="{StaticResource ModernTextBox}"/>
+                             Style="{StaticResource ModernTextBox}"
+                             Text="{Binding MezzoSelezionato.pagamentoMezzo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </GroupBox>
 
                 <!-- Tipo -->
@@ -112,10 +180,13 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBox Grid.Column="0" Name="TipoTextBox" Height="23" 
-                                 Style="{StaticResource ModernTextBox}"/>
+                                 Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding MezzoSelezionato.Gruppo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <CheckBox Grid.Column="1" Name="PagamentoInterbancarioCheckBox" 
-                                  Content="Pagamento Interbancario" Foreground="White"
-                                  VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                 Content="Pagamento Interbancario" Foreground="White"
+                                 VerticalAlignment="Center" Margin="10,0,0,0"
+                                 IsThreeState="False"
+                                 IsChecked="{Binding MezzoSelezionato.PagamentoInterbancario, Mode=TwoWay, Converter={StaticResource BoolToByteConverter}, FallbackValue=False, TargetNullValue=False}"/>
                     </Grid>
                 </GroupBox>
             </StackPanel>
@@ -126,7 +197,8 @@
                   Style="{StaticResource ModernGroupBox}" Margin="10">
             <TextBox Name="CodiceFatturazioneElettronicaTextBox" Height="23" 
                      Width="120" HorizontalAlignment="Left"
-                     Style="{StaticResource ModernTextBox}"/>
+                     Style="{StaticResource ModernTextBox}"
+                     Text="{Binding MezzoSelezionato.FE_ModPag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </GroupBox>
     </Grid>
 </UserControl>

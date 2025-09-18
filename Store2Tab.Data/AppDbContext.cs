@@ -11,6 +11,7 @@ namespace Store2Tab.Data
 
         public DbSet<Banca> Banche { get; set; }
         public DbSet<CausaleMovimento> CausaliMovimento { get; set; }
+        public DbSet<PagamentoMezzo> PagamentiMezzo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -135,6 +136,46 @@ namespace Store2Tab.Data
 
                 // Configura il nome della tabella
                 entity.ToTable("TContCausale");
+            });
+            #endregion
+
+            #region PagamentoMezzo
+            modelBuilder.Entity<PagamentoMezzo>(entity =>
+            {
+                entity.HasKey(e => e.IdPagamentoMezzo);
+
+                entity.Property(e => e.IdPagamentoMezzo)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPagamentoMezzo");
+
+                entity.Property(e => e.Gruppo)
+                    .IsRequired()
+                    .HasMaxLength(3)
+                    .HasColumnName("Gruppo");
+
+                entity.Property(e => e.pagamentoMezzo)
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasColumnName("PagamentoMezzo");
+
+                entity.Property(e => e.PagamentoInterbancario)
+                    .IsRequired()
+                    .HasColumnName("PagamentoInterbancario");
+
+                entity.Property(e => e.IdBanca_Emesso)
+                    .IsRequired()
+                    .HasColumnName("IdBanca_Emesso");
+
+                entity.Property(e => e.IdBanca_Ricevuto)
+                    .IsRequired()
+                    .HasColumnName("IdBanca_Ricevuto");
+
+                entity.Property(e => e.FE_ModPag)
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnName("FE_ModPag");
+
+                entity.ToTable("TPagamentoMezzo");
             });
             #endregion
         }
