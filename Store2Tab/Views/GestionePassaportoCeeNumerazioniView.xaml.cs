@@ -8,21 +8,21 @@ using Store2Tab.ViewModels;
 
 namespace Store2Tab.Views
 {
-    public partial class GestioneSpecieBotanicheView : UserControl
+    public partial class GestionePassaportoCeeNumerazioniView : UserControl
     {
-        private SpecieBotanicheViewModel ViewModel => (SpecieBotanicheViewModel)DataContext;
+        private PassaportoCeeNumerazioniViewModel ViewModel => (PassaportoCeeNumerazioniViewModel)DataContext;
 
-        public GestioneSpecieBotanicheView()
+        public GestionePassaportoCeeNumerazioniView()
         {
             InitializeComponent();
-            DataContext = new SpecieBotanicheViewModel();
+            DataContext = new PassaportoCeeNumerazioniViewModel();
 
             // Associa i tasti funzione
-            KeyDown += GestioneSpecieBotanicheView_KeyDown;
+            KeyDown += GestionePassaportoCeeNumerazioniView_KeyDown;
             Focusable = true;
         }
 
-        private void GestioneSpecieBotanicheView_KeyDown(object sender, KeyEventArgs e)
+        private void GestionePassaportoCeeNumerazioniView_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -46,48 +46,48 @@ namespace Store2Tab.Views
                     break;
                 case Key.Escape:
                     // Chiudi finestra o deseleziona
-                    SpecieBotanicheDataGrid.UnselectAll();
-                    ViewModel.SpecieSelezionata = null;
+                    NumerazioniDataGrid.UnselectAll();
+                    ViewModel.NumerazioneSelezionata = null;
                     break;
             }
         }
 
         private void Nuovo_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.NuovaSpecie();
-            SpecieBotanicaTextBox.Focus();
+            ViewModel.NuovaNumerazione();
+            DescrizioneTextBox.Focus();
         }
 
         private void Salva_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.SalvaSpecie();
+            ViewModel.SalvaNumerazione();
         }
 
         private void Cancella_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.CancellaSpecie();
+            ViewModel.CancellaNumerazione();
         }
 
         // Nuovo metodo per la cancellazione multipla
         private void CancellaMultipla_Click(object sender, RoutedEventArgs e)
         {
-            var elementiSelezionati = SpecieBotanicheDataGrid.SelectedItems
-                .Cast<PassPianteCeeSpecie>()
+            var elementiSelezionati = NumerazioniDataGrid.SelectedItems
+                .Cast<PassPianteCeeNumerazione>()
                 .ToList();
 
             if (elementiSelezionati.Count == 0)
             {
-                MessageBox.Show("Selezionare una o più specie botaniche da cancellare.",
+                MessageBox.Show("Selezionare una o più numerazioni da cancellare.",
                     "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            ViewModel.CancellaSpecieMultiple(elementiSelezionati);
+            ViewModel.CancellaNumerazioniMultiple(elementiSelezionati);
         }
 
         private void Cerca_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.CercaSpecie();
+            ViewModel.CercaNumerazioni();
         }
 
         private void Annulla_Click(object sender, RoutedEventArgs e)
@@ -96,33 +96,33 @@ namespace Store2Tab.Views
         }
 
         // Gestisce la selezione nella DataGrid
-        private void SpecieBotanicheDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void NumerazioniDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is DataGrid dataGrid)
             {
                 // Aggiorna la collezione degli elementi selezionati nel ViewModel
                 ViewModel.ElementiSelezionati.Clear();
-                foreach (PassPianteCeeSpecie item in dataGrid.SelectedItems)
+                foreach (PassPianteCeeNumerazione item in dataGrid.SelectedItems)
                 {
                     ViewModel.ElementiSelezionati.Add(item);
                 }
 
-                // Se c'è un solo elemento selezionato, lo imposta come SpecieSelezionata
+                // Se c'è un solo elemento selezionato, lo imposta come NumerazioneSelezionata
                 // questo mantiene la compatibilità con la visualizzazione dei dettagli
                 if (dataGrid.SelectedItems.Count == 1)
                 {
-                    var selected = dataGrid.SelectedItems[0] as PassPianteCeeSpecie;
-                    if (selected != ViewModel.SpecieSelezionata)
+                    var selected = dataGrid.SelectedItems[0] as PassPianteCeeNumerazione;
+                    if (selected != ViewModel.NumerazioneSelezionata)
                     {
-                        ViewModel.SpecieSelezionata = selected;
+                        ViewModel.NumerazioneSelezionata = selected;
                     }
                 }
                 else if (dataGrid.SelectedItems.Count == 0)
                 {
                     // Se non c'è nulla di selezionato, azzera la selezione
-                    ViewModel.SpecieSelezionata = null;
+                    ViewModel.NumerazioneSelezionata = null;
                 }
-                // Se ci sono più elementi selezionati, mantiene l'ultimo SpecieSelezionata
+                // Se ci sono più elementi selezionati, mantiene l'ultimo NumerazioneSelezionata
                 // ma aggiorna comunque ElementiSelezionati per la cancellazione multipla
             }
         }
@@ -131,13 +131,13 @@ namespace Store2Tab.Views
         private void CodiceRicercaTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Opzionale: ricerca automatica mentre si digita
-            // ViewModel.CercaSpecie();
+            // ViewModel.CercaNumerazioni();
         }
 
-        private void SpecieRicercaTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void DescrizioneRicercaTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Opzionale: ricerca automatica mentre si digita  
-            // ViewModel.CercaSpecie();
+            // ViewModel.CercaNumerazioni();
         }
 
         // Gestori per Enter nei campi di ricerca
@@ -145,31 +145,31 @@ namespace Store2Tab.Views
         {
             if (e.Key == Key.Enter)
             {
-                ViewModel.CercaSpecie();
+                ViewModel.CercaNumerazioni();
             }
         }
 
-        private void SpecieRicercaTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void DescrizioneRicercaTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                ViewModel.CercaSpecie();
+                ViewModel.CercaNumerazioni();
             }
         }
 
         // Metodi opzionali per selezione multipla
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
-            SpecieBotanicheDataGrid.SelectAll();
+            NumerazioniDataGrid.SelectAll();
         }
 
         private void UnselectAll_Click(object sender, RoutedEventArgs e)
         {
-            SpecieBotanicheDataGrid.UnselectAll();
+            NumerazioniDataGrid.UnselectAll();
         }
 
         // Override per gestire la navigazione con le frecce nel DataGrid
-        private void SpecieBotanicheDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void NumerazioniDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // Permette la navigazione con le frecce anche quando è selezionato un singolo elemento
             if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.PageUp || e.Key == Key.PageDown)
@@ -181,7 +181,7 @@ namespace Store2Tab.Views
             // Per altri tasti, propaga l'evento alla finestra principale per i tasti funzione
             if (e.Key >= Key.F1 && e.Key <= Key.F12)
             {
-                GestioneSpecieBotanicheView_KeyDown(sender, e);
+                GestionePassaportoCeeNumerazioniView_KeyDown(sender, e);
             }
         }
 
@@ -194,18 +194,11 @@ namespace Store2Tab.Views
         // Evento per gestire il caricamento della View
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Focus automatico sulla specie quando la view si carica
-            if (SpecieBotanicheDataGrid.Items.Count == 0)
+            // Focus automatico sulla ricerca per descrizione quando la view si carica
+            if (NumerazioniDataGrid.Items.Count == 0)
             {
-                SpecieBotanicaTextBox.Focus();
+                DescrizioneTextBox.Focus();
             }
-        }
-
-        // Metodi di compatibilità con il vecchio sistema (se necessari)
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Redirigi al metodo principale
-            SpecieBotanicheDataGrid_SelectionChanged(sender, e);
         }
     }
 }

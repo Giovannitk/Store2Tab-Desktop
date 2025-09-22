@@ -12,6 +12,10 @@ namespace Store2Tab.Data
         public DbSet<Banca> Banche { get; set; }
         public DbSet<CausaleMovimento> CausaliMovimento { get; set; }
         public DbSet<PagamentoMezzo> PagamentiMezzo { get; set; }
+        public DbSet<PassPianteCeeNumerazione> PassPianteCeeNumerazioni { get; set; }
+        public DbSet<PassPianteCeeSpecie> PassPianteCeeSpecie { get; set; }
+        public DbSet<PassPianteCeeVarieta> PassPianteCeeVarieta { get; set; }
+        public DbSet<PassPianteCEE_Portinnesto> PassPianteCeePortinnesto { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -176,6 +180,98 @@ namespace Store2Tab.Data
                     .HasColumnName("FE_ModPag");
 
                 entity.ToTable("TPagamentoMezzo");
+            });
+            #endregion
+
+            #region PassPianteCeeNumerazione
+            modelBuilder.Entity<PassPianteCeeNumerazione>(entity =>
+            {
+                entity.HasKey(e => e.IdPassPianteCEE_Numerazione);
+                entity.Property(e => e.IdPassPianteCEE_Numerazione)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPassPianteCEE_Numerazione");
+                entity.Property(e => e.Descrizione)
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasColumnName("Descrizione");
+                entity.Property(e => e.Sigla)
+                    .HasMaxLength(10)
+                    .HasColumnName("Sigla");
+                entity.Property(e => e.Prefisso)
+                    .HasMaxLength(10)
+                    .HasColumnName("Prefisso");
+                entity.ToTable("TPassPianteCEE_Numerazione");
+            });
+            #endregion
+
+            #region PassPianteCeeSpecie
+            modelBuilder.Entity<PassPianteCeeSpecie>(entity =>
+            {
+                entity.HasKey(e => e.IdPassPianteCEE_Specie);
+                entity.Property(e => e.IdPassPianteCEE_Specie)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPassPianteCEE_Specie");
+                entity.Property(e => e.Specie)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("Specie");
+                entity.ToTable("TPassPianteCEE_Specie");
+            });
+            #endregion
+
+            #region PassPianteCeeVarieta
+            modelBuilder.Entity<PassPianteCeeVarieta>(entity =>
+            {
+                entity.HasKey(e => e.IdPassPianteCEE_Varieta);
+
+                entity.Property(e => e.IdPassPianteCEE_Varieta)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPassPianteCEE_Varieta");
+
+                entity.Property(e => e.IdPassPianteCEE_Specie)
+                    .IsRequired()
+                    .HasColumnName("IdPassPianteCEE_Specie");
+
+                entity.Property(e => e.Varieta)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("Varieta");
+
+                // Configurazione della relazione con PassPianteCeeSpecie
+                entity.HasOne(e => e.SpecieBotanica)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdPassPianteCEE_Specie)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable("TPassPianteCEE_Varieta");
+            });
+            #endregion
+
+            #region PassPianteCeePortinnesto
+            modelBuilder.Entity<PassPianteCEE_Portinnesto>(entity =>
+            {
+                entity.HasKey(e => e.IdPassPianteCEE_Portinnesto);
+
+                entity.Property(e => e.IdPassPianteCEE_Portinnesto)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPassPianteCEE_Portinnesto");
+
+                entity.Property(e => e.IdPassPianteCEE_Specie)
+                    .IsRequired()
+                    .HasColumnName("IdPassPianteCEE_Specie");
+
+                entity.Property(e => e.Portinnesto)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("Portinnesto");
+
+                // Configurazione della relazione con PassPianteCeeSpecie
+                entity.HasOne(e => e.SpecieBotanica)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdPassPianteCEE_Specie)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable("TPassPianteCEE_Portinnesto");
             });
             #endregion
         }

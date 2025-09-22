@@ -61,7 +61,7 @@
         <!-- Contenuto principale -->
         <Grid Grid.Row="2" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="500"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -86,8 +86,14 @@
                 </DataGrid.ColumnHeaderStyle>
 
                 <DataGrid.Columns>
+                    <DataGridTextColumn Header="Dal" 
+                                        Binding="{Binding Dal}" Width="100"/>
+                    <DataGridTextColumn Header="Al"
+                                        Binding="{Binding Al}" Width="100"/>
                     <DataGridTextColumn Header="Descrizione" 
                                         Binding="{Binding Descrizione}" Width="*"/>
+                    <DataGridTextColumn Header="Raggrupa per" 
+                                        Binding="{Binding Raggruppamento}" Width="*"/>
                 </DataGrid.Columns>
 
                 <DataGrid.Items>

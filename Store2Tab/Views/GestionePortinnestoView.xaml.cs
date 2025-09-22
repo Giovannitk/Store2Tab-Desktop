@@ -1,180 +1,234 @@
-﻿using Store2Tab.ViewModels;
+﻿using Store2Tab.Data.Models;
+using Store2Tab.ViewModels;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Store2Tab.Views
 {
-    /// <summary>
-    /// Classe per gli elementi del DataGrid dei Portinnesti
-    /// </summary>
-    public class PortinnestoItem
-    {
-        public string Codice { get; set; } = string.Empty;
-        public string SpecieBotanica { get; set; } = string.Empty;
-        public string Portinnesto { get; set; } = string.Empty;
-    }
-
     public partial class GestionePortinnestoView : UserControl
     {
+        private PortinnestoViewModel? _viewModel;
         public GestionePortinnestoView()
         {
             InitializeComponent();
-            DataContext = new PortinnestoViewModel();
+            _viewModel = new PortinnestoViewModel();
+            DataContext = _viewModel;
+
+            // Collegamento degli eventi
+            PortinnestoDataGrid.SelectionChanged += DataGrid_SelectionChanged;
+            CodiceRicercaTextBox.KeyDown += CodiceRicerca_KeyDown;
+            DescrizioneRicercaTextBox.KeyDown += DescrizioneRicerca_KeyDown;
 
             // Popola ComboBox e DataGrid
-            PopulateSpecieBotanicheComboBox();
-            PopulateDataGrid();
-        }
-
-        private void PopulateSpecieBotanicheComboBox()
-        {
-            var specieBotaniche = new List<string>
-            {
-                "Malus domestica",
-                "Pyrus communis",
-                "Prunus persica",
-                "Prunus armeniaca",
-                "Prunus avium",
-                "Prunus cerasus",
-                "Citrus limon",
-                "Citrus sinensis",
-                "Vitis vinifera",
-                "Olea europaea"
-            };
-
-            foreach (var specie in specieBotaniche)
-            {
-                SpecieBotanicaComboBox.Items.Add(specie);
-            }
-        }
-
-        private void PopulateDataGrid()
-        {
-            var portinnestiEsempio = new List<PortinnestoItem>
-            {
-                new PortinnestoItem
-                {
-                    Codice = "1",
-                    SpecieBotanica = "Malus domestica",
-                    Portinnesto = "M9"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "2",
-                    SpecieBotanica = "Malus domestica",
-                    Portinnesto = "MM106"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "3",
-                    SpecieBotanica = "Pyrus communis",
-                    Portinnesto = "Cotogno Adams"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "4",
-                    SpecieBotanica = "Prunus persica",
-                    Portinnesto = "GF 677"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "5",
-                    SpecieBotanica = "Prunus avium",
-                    Portinnesto = "Gisela 5"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "6",
-                    SpecieBotanica = "Vitis vinifera",
-                    Portinnesto = "SO4"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "7",
-                    SpecieBotanica = "Vitis vinifera",
-                    Portinnesto = "1103 Paulsen"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "8",
-                    SpecieBotanica = "Citrus limon",
-                    Portinnesto = "Citrange Carrizo"
-                },
-                new PortinnestoItem
-                {
-                    Codice = "9",
-                    SpecieBotanica = "Olea europaea",
-                    Portinnesto = "Frantoio selvatico"
-                }
-            };
-
-            foreach (var portinnesto in portinnestiEsempio)
-            {
-                PortinnestoDataGrid.Items.Add(portinnesto);
-            }
+            //PopulateSpecieBotanicheComboBox();
+            //PopulateDataGrid();
         }
 
         private void Nuovo_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
-            {
-                viewModel.NuovoPortinnesto();
-            }
+            _viewModel?.NuovoPortinnesto();
+
+            // Pulisce i campi di dettaglio per inserimento
+            CodiceTextBox.Text = _viewModel?.CodiceProposto.ToString() ?? "0";
+            SpecieBotanicaComboBox.SelectedItem = null;
+
+            PortinnestoTextBox.Text = "";
+            PortinnestoTextBox.Focus();
         }
 
         private void Salva_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
+            if (_viewModel?.PortinnestoSelezionata != null)
             {
-                viewModel.SalvaPortinnesto();
+                // Aggiorna i dati dal form prima di salvare
+                if (!string.IsNullOrWhiteSpace(PortinnestoTextBox.Text))
+                {
+                    _viewModel.PortinnestoSelezionata.Portinnesto = PortinnestoTextBox.Text.Trim();
+                }
+
+                // Aggiorna la specie selezionata dal ComboBox
+                if (SpecieBotanicaComboBox.SelectedItem is PassPianteCeeSpecie specieSelezionata)
+                {
+                    _viewModel.SpecieSelezionata = specieSelezionata;
+                }
             }
+
+            _viewModel?.SalvoPortinnesto();
+            AggiornaDettagli();
         }
 
         private void Cancella_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
+            if (_viewModel?.PortinnestoSelezionata == null)
             {
-                var result = MessageBox.Show("Sei sicuro di voler cancellare il portinnesto selezionato?",
-                    "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    viewModel.CancellaPortinnesto();
-                }
+                MessageBox.Show("Seleziona un portinnesto da cancellare.", "Attenzione",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show("Sei sicuro di voler cancellare il portinnesto selezionato?",
+                "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _viewModel?.CancellaPortinnesto();
+            }
+        }
+
+        // Nuovo metodo per la cancellazione multipla
+        private void CancellaMultipla_Click(object sender, RoutedEventArgs e)
+        {
+            var elementiSelezionati = PortinnestoDataGrid.SelectedItems
+                .Cast<PassPianteCEE_Portinnesto>()
+                .ToList();
+            if (elementiSelezionati.Count == 0)
+            {
+                MessageBox.Show("Selezionare uno o più portinnesti da cancellare.",
+                    "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            var result = MessageBox.Show($"Sei sicuro di voler cancellare i {elementiSelezionati.Count} portinnesti selezionati?",
+                "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                _viewModel?.CancellaPortinnestoMultiple(elementiSelezionati);
             }
         }
 
         private void Annulla_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
-            {
-                viewModel.AnnullaModifiche();
-            }
+            _viewModel?.AnnullaModifiche();
+            AggiornaDettagli();
         }
 
         private void Cerca_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
+            // Aggiorna i filtri di ricerca dal form
+            if (_viewModel != null)
             {
-                viewModel.CercaPortinnesti();
+                _viewModel.FiltroCodice = CodiceRicercaTextBox.Text.Trim();
+                _viewModel.FiltroPortinnesto = DescrizioneRicercaTextBox.Text.Trim();
+
+                // Se c'è una specie selezionata nella ComboBox del filtro, usala per la ricerca
+                // Nota: questo richiederebbe una ComboBox separata nei filtri per la specie
+
+                _viewModel.CercaPortinnesto();
             }
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataContext is PortinnestoViewModel viewModel)
+            if (PortinnestoDataGrid.SelectedItem is PassPianteCEE_Portinnesto selectedItem && _viewModel != null)
             {
-                if (PortinnestoDataGrid.SelectedItem is PortinnestoItem selectedItem)
-                {
-                    viewModel.SelezionaPortinnesto(selectedItem.Codice, selectedItem.SpecieBotanica,
-                                                  selectedItem.Portinnesto);
-
-                    // Aggiorna i campi del pannello dettagli
-                    CodiceTextBox.Text = selectedItem.Codice;
-                    SpecieBotanicaComboBox.Text = selectedItem.SpecieBotanica;
-                    PortinnestoTextBox.Text = selectedItem.Portinnesto;
-                }
+                _viewModel.SelezionaPortinnesto(selectedItem);
+                AggiornaDettagli();
             }
         }
+
+        private void AggiornaDettagli()
+        {
+            if (_viewModel?.PortinnestoSelezionata != null)
+            {
+                var portinnesto = _viewModel.PortinnestoSelezionata;
+
+                // Aggiorno i campi del pannello dettagli
+                CodiceTextBox.Text = portinnesto.IdPassPianteCEE_Portinnesto.ToString();
+                PortinnestoTextBox.Text = portinnesto.Portinnesto ?? "";
+
+                // Seleziona la specie botanica corrispondente nella ComboBox
+                var specie = _viewModel.SpecieBotaniche.FirstOrDefault(s =>
+                    s.IdPassPianteCEE_Specie == portinnesto.IdPassPianteCEE_Specie);
+                SpecieBotanicaComboBox.SelectedItem = specie;
+            }
+            else
+            {
+                // Nessun portinnesto selezionato, pulisce i campi
+                CodiceTextBox.Text = _viewModel?.CodiceProposto.ToString() ?? "0";
+                SpecieBotanicaComboBox.SelectedItem = null;
+                PortinnestoTextBox.Text = "";
+            }
+        }
+
+        // Gestione pressione Enter nei campi di ricerca
+        private void CodiceRicerca_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                Cerca_Click(sender, e);
+            }
+        }
+
+        private void DescrizioneRicerca_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                Cerca_Click(sender, e);
+            }
+        }
+
+        // Eventi per attivare il salvataggio quando si modificano i campi
+        private void CodiceTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Il codice non dovrebbe essere modificabile dall'utente, solo visualizzazione
+        }
+
+        private void SpecieBotanicaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // La selezione della specie aggiorna il ViewModel
+            if (_viewModel?.PortinnestoSelezionata != null &&
+                SpecieBotanicaComboBox.SelectedItem is PassPianteCeeSpecie specieSelezionata)
+            {
+                _viewModel.SpecieSelezionata = specieSelezionata;
+            }
+        }
+
+        private void PortinnestoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Aggiorna il ViewModel quando il testo del portinnesto cambia
+            if (_viewModel?.PortinnestoSelezionata != null)
+            {
+                _viewModel.PortinnestoSelezionata.Portinnesto = PortinnestoTextBox.Text;
+            }
+        }
+
+        // Gestione di tutti i tasti di scelta rapida
+        private void UserControl_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case System.Windows.Input.Key.F1:
+                    Nuovo_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case System.Windows.Input.Key.F2:
+                    Salva_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case System.Windows.Input.Key.F3:
+                    Cerca_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case System.Windows.Input.Key.F4:
+                    Cancella_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case System.Windows.Input.Key.F5:
+                    CancellaMultipla_Click(sender, e);
+                    break;
+                case System.Windows.Input.Key.F8:
+                    Annulla_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case System.Windows.Input.Key.Escape:
+                    // Chiude la finestra come nel codice VB6
+                    if (Window.GetWindow(this) is Window parentWindow)
+                    {
+                        parentWindow.Close();
+                    }
+                    e.Handled = true;
+                    break;
+            }
+        }
+
     }
 }

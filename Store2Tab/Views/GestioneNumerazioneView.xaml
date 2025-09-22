@@ -22,7 +22,7 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar con pulsanti -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="35">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
             <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
                     Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 

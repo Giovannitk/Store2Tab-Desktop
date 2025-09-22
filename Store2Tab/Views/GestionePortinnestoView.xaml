@@ -1,13 +1,19 @@
 ﻿<UserControl x:Class="Store2Tab.Views.GestionePortinnestoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Store2Tab.Views">
+             xmlns:local="clr-namespace:Store2Tab.Views"
+             xmlns:conv="clr-namespace:Store2Tab.Converters"
+             KeyDown="UserControl_KeyDown"
+             Focusable="True">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/SharedStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <conv:BooleanInverseConverter x:Key="BooleanInverseConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -22,19 +28,21 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar con pulsanti -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="35">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
             <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
-                    Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
-                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
-                    Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <Button Name="CancellaMultiplaButton" Content="F5-Canc.Mult." Width="100" Margin="5,3" 
+            Click="CancellaMultipla_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
-                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
         </StackPanel>
 
         <!-- Sezione filtri ricerca -->
-        <Grid Grid.Row="1" Background="#FF3F3F46" Height="35">
+        <Grid Grid.Row="1" Background="#FF3F3F46" Height="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="120"/>
@@ -47,12 +55,14 @@
             <TextBlock Grid.Column="0" Text="codice" Foreground="White" 
                        VerticalAlignment="Center" Margin="10,0,5,0"/>
             <TextBox Grid.Column="1" Name="CodiceRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroCodice, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBlock Grid.Column="2" Text="descrizione" Foreground="White" 
                        VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox Grid.Column="3" Name="DescrizioneRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroPortinnesto, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Button Grid.Column="5" Name="CercaButton" Content="F3-Cerca" Width="80" 
                     Margin="10,6" Click="Cerca_Click" Style="{StaticResource ModernButton}"/>
@@ -72,7 +82,10 @@
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
                       BorderBrush="#FF434346" BorderThickness="1"
                       SelectionChanged="DataGrid_SelectionChanged"
-                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30">
+                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30"
+                      ItemsSource="{Binding Portinnesto}"
+                      SelectedItem="{Binding PortinnestoSelezionata}"
+                      IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanInverseConverter}}">
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
@@ -86,14 +99,13 @@
                 </DataGrid.ColumnHeaderStyle>
 
                 <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" 
+                                        Binding="{Binding IdPassPianteCEE_Portinnesto}" Width="40"/>
                     <DataGridTextColumn Header="Specie Botanica" 
-                                        Binding="{Binding SpecieBotanica}" Width="200"/>
+                                        Binding="{Binding SpecieBotanica.Specie}" Width="180"/>
                     <DataGridTextColumn Header="Portinnesto" 
                                         Binding="{Binding Portinnesto}" Width="*"/>
                 </DataGrid.Columns>
-
-                <DataGrid.Items>
-                </DataGrid.Items>
             </DataGrid>
 
             <!-- Pannello dettagli (destra) -->
@@ -102,41 +114,63 @@
                 <!-- Codice -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Codice" Foreground="White" 
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Grid.Column="1" Name="CodiceTextBox" Height="25" 
-                             Style="{StaticResource ModernTextBox}"/>
+                             Style="{StaticResource ModernTextBox}" 
+                            Text="{Binding CodiceProposto}"
+                            IsReadOnly="True" Background="#FF555555"/>
                 </Grid>
 
                 <!-- Specie Botanica (ComboBox) -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="250"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Specie Botanica" Foreground="White" 
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <ComboBox Grid.Column="1" Name="SpecieBotanicaComboBox" Height="25" 
-                              Style="{StaticResource ModernComboBox}"/>
+                              Style="{StaticResource ModernComboBox}"
+                              ItemsSource="{Binding SpecieBotaniche}"
+                              SelectedItem="{Binding SpecieSelezionata}"
+                              DisplayMemberPath="Specie"
+                              SelectionChanged="SpecieBotanicaComboBox_SelectionChanged"
+                              IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanInverseConverter}}"
+                              Foreground="Black"/>
                 </Grid>
 
                 <!-- Portinnesto -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="250"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Portinnesto" Foreground="White" 
                                VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Grid.Column="1" Name="PortinnestoTextBox" Height="25" 
-                             Style="{StaticResource ModernTextBox}"/>
+                             Style="{StaticResource ModernTextBox}"
+                             Text="{Binding PortinnestoSelezionata.Portinnesto, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="PortinnestoTextBox_TextChanged"
+                             IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanInverseConverter}}"/>
                 </Grid>
+
+                <!-- Indicatore di caricamento -->
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0" 
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Caricamento in corso..." Foreground="Yellow" 
+                                VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ProgressBar Width="100" Height="20" IsIndeterminate="True"/>
+                </StackPanel>
 
             </StackPanel>
         </Grid>
