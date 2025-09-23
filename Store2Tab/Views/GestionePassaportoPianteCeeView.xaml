@@ -1,13 +1,19 @@
 ﻿<UserControl x:Class="Store2Tab.Views.GestionePassaportoPianteCeeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Store2Tab.Views">
+             xmlns:local="clr-namespace:Store2Tab.Views"
+             xmlns:conv="clr-namespace:Store2Tab.Converters">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/SharedStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Converter for byte <-> bool mapping -->
+            <local:ByteToBoolConverter x:Key="ByteToBoolConverter"/>
+            <!-- Converter for Raggruppamento byte -> description -->
+            <conv:RaggruppamentoConverter x:Key="RaggruppamentoConverter"/>
+
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -22,7 +28,7 @@
         </Grid.RowDefinitions>
 
         <!-- Toolbar con pulsanti -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="35">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
             <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
                     Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
@@ -34,7 +40,7 @@
         </StackPanel>
 
         <!-- Sezione filtri ricerca -->
-        <Grid Grid.Row="1" Background="#FF3F3F46" Height="35">
+        <Grid Grid.Row="1" Background="#FF3F3F46" Height="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="120"/>
@@ -47,12 +53,16 @@
             <TextBlock Grid.Column="0" Text="codice" Foreground="White" 
                        VerticalAlignment="Center" Margin="10,0,5,0"/>
             <TextBox Grid.Column="1" Name="CodiceRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroCodice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="CodiceRicercaTextBox_KeyDown"/>
 
             <TextBlock Grid.Column="2" Text="descrizione" Foreground="White" 
                        VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox Grid.Column="3" Name="DescrizioneRicercaTextBox" Height="23" 
-                     Margin="0,6" Style="{StaticResource ModernTextBox}"/>
+                     Margin="0,6" Style="{StaticResource ModernTextBox}"
+                     Text="{Binding FiltroDescrizione, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="DescrizioneRicercaTextBox_KeyDown"/>
 
             <Button Grid.Column="5" Name="CercaButton" Content="F3-Cerca" Width="80" 
                     Margin="10,6" Click="Cerca_Click" Style="{StaticResource ModernButton}"/>
@@ -61,113 +71,284 @@
         <!-- Contenuto principale -->
         <Grid Grid.Row="2" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="500"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- DataGrid passaporti (sinistra) -->
-            <DataGrid Grid.Column="0" Name="PassaportiDataGrid" 
-                      AutoGenerateColumns="False" CanUserAddRows="False"
-                      Background="#FF3F3F46" Foreground="White" 
-                      GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                      BorderBrush="#FF434346" BorderThickness="1"
-                      SelectionChanged="DataGrid_SelectionChanged"
-                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30">
+            <DataGrid
+    Grid.Column="0"
+    Name="PassaportiDataGrid"
+    AutoGenerateColumns="False"
+    CanUserAddRows="False"
+    IsReadOnly="True"
+    CanUserResizeColumns="True"
+    CanUserSortColumns="True"
+    HorizontalScrollBarVisibility="Auto"
+    VerticalScrollBarVisibility="Auto"
+    Background="#FF3F3F46"
+    Foreground="White"
+    GridLinesVisibility="Horizontal"
+    HeadersVisibility="Column"
+    BorderBrush="#FF434346"
+    BorderThickness="1"
+    ItemsSource="{Binding Tipi}"
+    SelectedItem="{Binding TipoSelezionato, Mode=TwoWay}"
+    RowBackground="#FF3F3F46"
+    AlternatingRowBackground="#FF2D2D30"
+    RowHeight="25"
+    FontSize="12"
+    SelectionMode="Single"
+    SelectionUnit="FullRow">
+
+                <!-- Stili personalizzati per il DataGrid -->
+                <DataGrid.Resources>
+                    <!-- Stile per le celle -->
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF007ACC"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <!-- Stile per le righe -->
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Height" Value="25"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF404040"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF007ACC"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="#FF434346"/>
                         <Setter Property="Foreground" Value="White"/>
-                        <Setter Property="Height" Value="25"/>
-                        <Setter Property="Padding" Value="5,0"/>
+                        <Setter Property="Height" Value="30"/>
+                        <Setter Property="Padding" Value="8,5"/>
                         <Setter Property="BorderBrush" Value="#FF666666"/>
                         <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF505050"/>
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Dal" 
-                                        Binding="{Binding Dal}" Width="100"/>
-                    <DataGridTextColumn Header="Al"
-                                        Binding="{Binding Al}" Width="100"/>
-                    <DataGridTextColumn Header="Descrizione" 
-                                        Binding="{Binding Descrizione}" Width="*"/>
-                    <DataGridTextColumn Header="Raggrupa per" 
-                                        Binding="{Binding Raggruppamento}" Width="*"/>
-                </DataGrid.Columns>
+                    <!-- ID nascosto per binding interno -->
+                    <DataGridTextColumn 
+            Header="ID" 
+            Binding="{Binding IdPassPianteCEE_Tipo}" 
+            Visibility="Collapsed"/>
 
-                <DataGrid.Items>
-                </DataGrid.Items>
+                    <!-- Data Dal con larghezza fissa -->
+                    <DataGridTextColumn 
+            Header="Dal" 
+            Binding="{Binding Dal, StringFormat=dd/MM/yyyy}" 
+            Width="90"
+            SortMemberPath="Dal">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="2"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Data Al con larghezza fissa -->
+                    <DataGridTextColumn 
+            Header="Al" 
+            Binding="{Binding Al, StringFormat=dd/MM/yyyy}" 
+            Width="90"
+            SortMemberPath="Al">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="2"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Descrizione con larghezza proporzionale -->
+                    <DataGridTextColumn 
+            Header="Descrizione" 
+            Binding="{Binding Descrizione}" 
+            Width="2*"
+            SortMemberPath="Descrizione">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="2"/>
+                                <Setter Property="ToolTip" Value="{Binding Descrizione}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Numerazione con larghezza proporzionale -->
+                    <DataGridTextColumn 
+            Header="Numerazione" 
+            Binding="{Binding Numerazione.Descrizione}" 
+            Width="1.5*"
+            SortMemberPath="Numerazione.Descrizione">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="2"/>
+                                <Setter Property="ToolTip" Value="{Binding Numerazione.Descrizione}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Raggruppamento con larghezza proporzionale -->
+                    <DataGridTextColumn 
+            Header="Raggruppamento" 
+            Binding="{Binding Raggruppamento, Converter={StaticResource RaggruppamentoConverter}}" 
+            Width="2*"
+            SortMemberPath="Raggruppamento">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="2"/>
+                                <Setter Property="ToolTip" Value="{Binding Raggruppamento, Converter={StaticResource RaggruppamentoConverter}}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
             </DataGrid>
 
             <!-- Pannello dettagli (destra) -->
-            <ScrollViewer Grid.Column="1" Margin="15,0,0,0" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="1" Margin="15,0,0,0" VerticalScrollBarVisibility="Auto" Width="Auto">
                 <StackPanel>
 
                     <!-- Prima riga: Codice, Valido Dal, Valido Al, Numerazione -->
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <!-- Codice -->
+                            <ColumnDefinition Width="2*"/>
+                            <!-- Valido Dal -->
+                            <ColumnDefinition Width="2*"/>
+                            <!-- Valido Al -->
+                            <ColumnDefinition Width="3*"/>
+                            <!-- Numerazione -->
                         </Grid.ColumnDefinitions>
 
                         <!-- Codice -->
                         <GroupBox Grid.Column="0" Header="Codice" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="0,0,5,0">
-                            <TextBox Name="CodiceTextBox" Height="25" 
-                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+              Margin="0,0,5,0">
+                            <TextBox Name="CodiceTextBox" Height="25" VerticalAlignment="Top" 
+                 Style="{StaticResource ModernTextBox}" 
+                 Text="{Binding CodiceProposto}" IsReadOnly="True"/>
                         </GroupBox>
 
                         <!-- Valido Dal -->
                         <GroupBox Grid.Column="1" Header="Valido Dal" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="5,0,5,0">
-                            <TextBox Name="ValidoDalTextBox" Height="25" 
-                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+              Margin="5,0,5,0">
+                            <DatePicker Name="ValidoDalDatePicker" Height="25"
+                    VerticalAlignment="Top"
+                    SelectedDate="{Binding TipoSelezionato.Dal, Mode=TwoWay}"
+                    SelectedDateFormat="Short"
+                    SelectedDateChanged="DatePicker_SelectedDateChanged"/>
                         </GroupBox>
 
                         <!-- Valido Al -->
                         <GroupBox Grid.Column="2" Header="Valido Al" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="5,0,5,0">
-                            <TextBox Name="ValidoAlTextBox" Height="25" 
-                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+              Margin="5,0,5,0">
+                            <DatePicker Name="ValidoAlDatePicker" Height="25"
+                    VerticalAlignment="Top"
+                    SelectedDate="{Binding TipoSelezionato.Al, Mode=TwoWay}"
+                    SelectedDateFormat="Short"
+                    SelectedDateChanged="DatePicker_SelectedDateChanged"/>
                         </GroupBox>
 
                         <!-- Numerazione -->
                         <GroupBox Grid.Column="3" Header="Numerazione" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="5,0,0,0">
+              Margin="5,0,0,0">
                             <ComboBox Name="NumerazioneComboBox" Height="25" 
-                                      VerticalAlignment="Top" Style="{StaticResource ModernComboBox}"/>
+                                      VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                                      ItemsSource="{Binding Numerazioni}"
+                                      DisplayMemberPath="Descrizione"
+                                      SelectedValuePath="IdPassPianteCEE_Numerazione"
+                                      SelectedValue="{Binding TipoSelezionato.IdPassPianteCEE_Numerazione, Mode=TwoWay}"
+                                      SelectionChanged="NumerazioneComboBox_SelectionChanged"
+                                      Style="{StaticResource ModernComboBox}"
+                                      Foreground="Black"/>
                         </GroupBox>
                     </Grid>
 
+
                     <!-- Seconda riga: Paese di Origine -->
                     <GroupBox Header="Paese di Origine" Style="{StaticResource ModernGroupBox}" 
-                              Height="70" Margin="0,0,0,15">
+                              Height="Auto" Margin="0,0,0,15">
                         <TextBox Name="PaeseOrigineTextBox" Height="25" 
-                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding TipoSelezionato.PaeseOrigine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="TextBox_TextChanged"/>
                     </GroupBox>
 
                     <!-- Terza riga: Descrizione -->
                     <GroupBox Header="Descrizione" Style="{StaticResource ModernGroupBox}" 
-                              Height="70" Margin="0,0,0,15">
+                              Height="Auto" Margin="0,0,0,15">
                         <TextBox Name="DescrizioneTextBox" Height="25" 
-                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding TipoSelezionato.Descrizione, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="TextBox_TextChanged"/>
                     </GroupBox>
 
                     <!-- Quarta riga: Descrizione da stampare -->
                     <GroupBox Header="Descrizione da stampare" Style="{StaticResource ModernGroupBox}" 
-                              Height="70" Margin="0,0,0,15">
+                              Height="Auto" Margin="0,0,0,15">
                         <TextBox Name="DescrizioneStampareTextBox" Height="25" 
-                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding TipoSelezionato.DescrizioneStamp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="TextBox_TextChanged"/>
                     </GroupBox>
 
                     <!-- Quinta riga: Servizio Fitosanitario di -->
                     <GroupBox Header="Servizio Fitosanitario di" Style="{StaticResource ModernGroupBox}" 
-                              Height="70" Margin="0,0,0,15">
+                              Height="Auto" Margin="0,0,0,15">
                         <TextBox Name="ServizioFitosanitarioTextBox" Height="25" 
-                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding TipoSelezionato.ServizioFitosanitario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="TextBox_TextChanged"/>
                     </GroupBox>
 
                     <!-- Sesta riga: Codici Produttore -->
@@ -179,16 +360,20 @@
 
                         <!-- Codice Produttore -->
                         <GroupBox Grid.Column="0" Header="Codice Produttore" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="0,0,5,0">
+                                  Height="Auto" Margin="0,0,5,0">
                             <TextBox Name="CodiceProduttoreTextBox" Height="25" 
-                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                     Text="{Binding TipoSelezionato.CodiceProduttore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="TextBox_TextChanged"/>
                         </GroupBox>
 
                         <!-- Codice Produttore Originario -->
                         <GroupBox Grid.Column="1" Header="Codice Produttore Originario" Style="{StaticResource ModernGroupBox}" 
-                                  Height="70" Margin="5,0,0,0">
+                                  Height="Auto" Margin="5,0,0,0">
                             <TextBox Name="CodiceProduttoreOriginarioTextBox" Height="25" 
-                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                     VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                     Text="{Binding TipoSelezionato.CodiceProduttoreOrig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="TextBox_TextChanged"/>
                         </GroupBox>
                     </Grid>
 
@@ -202,12 +387,18 @@
                         <!-- Passaporto Piante CEE -->
                         <CheckBox Grid.Column="0" Name="PassaportoPianteCeeCheckBox" 
                                   Content="Passaporto Piante CEE" Foreground="White"
-                                  VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding TipoSelezionato.PassaportoCEE, Mode=TwoWay, Converter={StaticResource ByteToBoolConverter}}"
+                                  Checked="PassaportoPianteCeeCheckBox_Checked"
+                                  Unchecked="CheckBox_Changed"/>
 
                         <!-- Categoria Certificata C.A.C. -->
                         <CheckBox Grid.Column="1" Name="CategoriaCheckBox" 
                                   Content="Categoria Certificata C.A.C." Foreground="White"
-                                  VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding TipoSelezionato.CatCertCAC, Mode=TwoWay, Converter={StaticResource ByteToBoolConverter}}"
+                                  Checked="CheckBox_Changed"
+                                  Unchecked="CheckBox_Changed"/>
                     </Grid>
 
                     <!-- Ottava riga: CheckBoxes seconda riga -->
@@ -217,23 +408,57 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Documento di Commercializzazione -->
+                        <!-- Documento di commercializzazione -->
                         <CheckBox Grid.Column="0" Name="DocumentoCommercializzazioneCheckBox" 
-                                  Content="Documento di Commercializzazione" Foreground="White"
-                                  VerticalAlignment="Center"/>
+                                  Content="Documento di commercializzazione" Foreground="White"
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding TipoSelezionato.DocumentoCommerc, Mode=TwoWay, Converter={StaticResource ByteToBoolConverter}}"
+                                  Checked="DocumentoCommercializzazioneCheckBox_Checked"
+                                  Unchecked="CheckBox_Changed"/>
 
                         <!-- Stampa tesserino -->
                         <CheckBox Grid.Column="1" Name="StampaTesserinoCheckBox" 
                                   Content="Stampa tesserino" Foreground="White"
-                                  VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center"
+                                  IsChecked="{Binding TipoSelezionato.StampaTesserino, Mode=TwoWay, Converter={StaticResource ByteToBoolConverter}}"
+                                  Checked="CheckBox_Changed"
+                                  Unchecked="CheckBox_Changed"/>
+
                     </Grid>
 
-                    <!-- ComboBox finale -->
-                    <GroupBox Header="Crea un unico Passaporto o Documento per" Style="{StaticResource ModernGroupBox}" 
-                              Height="70" Margin="0,0,0,15">
+                    <!-- Combobox finale -->
+                    <GroupBox Header="Crea un unico Passaporto o Documento per" 
+          Style="{StaticResource ModernGroupBox}" 
+          Height="Auto" Margin="0,0,0,15">
+
                         <ComboBox Name="CreaPassaportoComboBox" Height="25" 
-                                  VerticalAlignment="Top" Style="{StaticResource ModernComboBox}">
-                            <ComboBoxItem Content="un Pass. per Specie, Varietà e Portinnesto (unico numero)"/>
+              VerticalAlignment="Top"
+              HorizontalAlignment="Stretch"
+              ItemsSource="{Binding OpzioniRaggruppamento}"
+              SelectedValuePath="Valore"
+              SelectedValue="{Binding TipoSelezionato.Raggruppamento, Mode=TwoWay}"
+              SelectionChanged="RaggruppamentoComboBox_SelectionChanged"
+              Style="{StaticResource ModernComboBox}"
+              Foreground="Black">
+
+                            <ComboBox.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="Black"/>
+                            </ComboBox.Resources>
+
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Descrizione}" Foreground="Black"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Setter Property="Background" Value="White"/>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+
                         </ComboBox>
                     </GroupBox>
 

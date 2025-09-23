@@ -16,6 +16,7 @@ namespace Store2Tab.Data
         public DbSet<PassPianteCeeSpecie> PassPianteCeeSpecie { get; set; }
         public DbSet<PassPianteCeeVarieta> PassPianteCeeVarieta { get; set; }
         public DbSet<PassPianteCEE_Portinnesto> PassPianteCeePortinnesto { get; set; }
+        public DbSet<PassPianteCeeTipo> PassPianteCeeTipo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -272,6 +273,80 @@ namespace Store2Tab.Data
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.ToTable("TPassPianteCEE_Portinnesto");
+            });
+            #endregion
+
+            #region PassPianteCeeTipo
+            modelBuilder.Entity<PassPianteCeeTipo>(entity =>
+            {
+                entity.HasKey(e => e.IdPassPianteCEE_Tipo);
+
+                entity.Property(e => e.IdPassPianteCEE_Tipo)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdPassPianteCEE_Tipo");
+
+                entity.Property(e => e.IdPassPianteCEE_Numerazione)
+                    .IsRequired()
+                    .HasColumnName("IdPassPianteCEE_Numerazione");
+
+                entity.Property(e => e.Descrizione)
+                    .IsRequired()
+                    .HasMaxLength(80)
+                    .HasColumnName("Descrizione");
+
+                entity.Property(e => e.ServizioFitosanitario)
+                    .HasMaxLength(50)
+                    .HasColumnName("ServizioFitosanitario");
+
+                entity.Property(e => e.CodiceProduttore)
+                    .HasMaxLength(50)
+                    .HasColumnName("CodiceProduttore");
+
+                entity.Property(e => e.CodiceProduttoreOrig)
+                    .HasMaxLength(50)
+                    .HasColumnName("CodiceProduttoreOrig");
+
+                entity.Property(e => e.PaeseOrigine)
+                    .HasMaxLength(50)
+                    .HasColumnName("PaeseOrigine");
+
+                entity.Property(e => e.StampaTesserino)
+                    .IsRequired()
+                    .HasColumnName("StampaTesserino");
+
+                entity.Property(e => e.PassaportoCEE)
+                    .IsRequired()
+                    .HasColumnName("PassaportoCEE");
+
+                entity.Property(e => e.DocumentoCommerc)
+                    .IsRequired()
+                    .HasColumnName("DocumentoCommerc");
+
+                entity.Property(e => e.CatCertCAC)
+                    .IsRequired()
+                    .HasColumnName("CatCertCAC");
+
+                entity.Property(e => e.Dal)
+                    .HasColumnName("Dal");
+
+                entity.Property(e => e.Al)
+                    .HasColumnName("Al");
+
+                entity.Property(e => e.DescrizioneStamp)
+                    .HasMaxLength(80)
+                    .HasColumnName("DescrizioneStamp");
+
+                entity.Property(e => e.Raggruppamento)
+                    .IsRequired()
+                    .HasColumnName("Raggruppamento");
+
+                // Configurazione della relazione con PassPianteCeeNumerazione
+                entity.HasOne(e => e.Numerazione)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdPassPianteCEE_Numerazione)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable("TPassPianteCEE_Tipo");
             });
             #endregion
         }
