@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Store2Tab.Data.Models;
 
 namespace Store2Tab.Data
@@ -347,6 +348,29 @@ namespace Store2Tab.Data
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.ToTable("TPassPianteCEE_Tipo");
+            });
+            #endregion
+
+            #region TipiAttivita
+            modelBuilder.Entity<TipiAttivita>(entity =>
+            {
+                // Configurata la chiave primaria
+                entity.HasKey(e => e.IdAnagraficaAttivita);
+
+                // IMPORTANTE: Configurato l'ID come IDENTITY (auto-incremento)
+                entity.Property(e => e.IdAnagraficaAttivita)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdAnagraficaAttivita");
+
+                // Configurato il campo descrizione
+                entity.Property(e => e.Attivita)
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasDefaultValue("")
+                    .HasColumnName("AnagraficaAttivita");
+
+                // Configurato il nome della tabella
+                entity.ToTable("TAnagraficaAttivita");
             });
             #endregion
         }
