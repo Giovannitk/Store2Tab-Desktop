@@ -18,6 +18,9 @@ namespace Store2Tab.Data
         public DbSet<PassPianteCeeVarieta> PassPianteCeeVarieta { get; set; }
         public DbSet<PassPianteCEE_Portinnesto> PassPianteCeePortinnesto { get; set; }
         public DbSet<PassPianteCeeTipo> PassPianteCeeTipo { get; set; }
+        public DbSet<TipiAttivita> TipiAttivita { get; set; }
+        public DbSet<NotaDocumento> NotaDocumento { get; set; }
+        public DbSet<Protocollo> Protocolli { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -371,6 +374,49 @@ namespace Store2Tab.Data
 
                 // Configurato il nome della tabella
                 entity.ToTable("TAnagraficaAttivita");
+            });
+            #endregion
+
+            #region NoteDocumento
+            modelBuilder.Entity<NotaDocumento>(entity =>
+            {
+                // Configurata la chiave primaria
+                entity.HasKey(e => e.IdNotaDocumento);
+
+                // IMPORTANTE: Configurato l'ID come IDENTITY (auto-incremento)
+                entity.Property(e => e.IdNotaDocumento)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdNotaDocumento");
+
+                // Configurato il campo descrizione
+                entity.Property(e => e.Nota)
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasDefaultValue("")
+                    .HasColumnName("NotaDocumento");
+
+                // Configurato il nome della tabella
+                entity.ToTable("TNotaDocumento");
+            });
+            #endregion
+
+            #region Protocolli
+            modelBuilder.Entity<Protocollo>(entity =>
+            {
+                // Configurata la chiave primaria
+                entity.HasKey(e => e.IdProtocollo);
+                // IMPORTANTE: Configurato l'ID come IDENTITY (auto-incremento)
+                entity.Property(e => e.IdProtocollo)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdProtocollo");
+                // Configurato il campo descrizione
+                entity.Property(e => e.NomeProtocollo)
+                    .IsRequired()
+                    .HasMaxLength(25)
+                    .HasDefaultValue("")
+                    .HasColumnName("Protocollo");
+                // Configurato il nome della tabella
+                entity.ToTable("TProtocollo");
             });
             #endregion
         }
