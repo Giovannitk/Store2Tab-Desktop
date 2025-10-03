@@ -21,12 +21,12 @@ namespace Store2Tab.Views
         public GestioneNumerazioneView()
         {
             InitializeComponent();
-            DataContext = new NumerazioneViewModel();
+            DataContext = new DocEmessoNumerazioneViewModel();
         }
 
         private void Nuovo_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
                 viewModel.NuovaNumerazione();
             }
@@ -34,7 +34,7 @@ namespace Store2Tab.Views
 
         private void Salva_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
                 viewModel.SalvaNumerazione();
             }
@@ -42,7 +42,7 @@ namespace Store2Tab.Views
 
         private void Cancella_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
                 var result = MessageBox.Show("Sei sicuro di voler cancellare la numerazione selezionata?",
                     "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -55,7 +55,7 @@ namespace Store2Tab.Views
 
         private void Annulla_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
                 viewModel.AnnullaModifiche();
             }
@@ -63,7 +63,7 @@ namespace Store2Tab.Views
 
         private void Cerca_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
                 viewModel.CercaNumerazioni();
             }
@@ -71,20 +71,11 @@ namespace Store2Tab.Views
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataContext is NumerazioneViewModel viewModel)
+            if (DataContext is DocEmessoNumerazioneViewModel viewModel)
             {
-                if (NumerazioneDataGrid.SelectedItem is NumerazioneItem selectedItem)
+                if (NumerazioneDataGrid.SelectedItem is DocEmessoNumerazioneItem selectedItem)
                 {
-                    viewModel.SelezionaNumerazione(selectedItem.Codice, selectedItem.Descrizione,
-                                                  selectedItem.Sigla, selectedItem.DocumentoElettronico,
-                                                  selectedItem.TipoDocumentoElettronico);
-
-                    // Aggiorna i campi del pannello dettagli
-                    CodiceTextBox.Text = selectedItem.Codice;
-                    NumerazioneDescrizioneTextBox.Text = selectedItem.Descrizione;
-                    SiglaTextBox.Text = selectedItem.Sigla;
-                    DocumentoElettronicoCheckBox.IsChecked = selectedItem.DocumentoElettronico == "True";
-                    TipoDocumentoElettronicoTextBox.Text = selectedItem.TipoDocumentoElettronico;
+                    viewModel.SelezionaNumerazione(selectedItem.Codice);
                 }
             }
         }

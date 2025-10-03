@@ -22,11 +22,15 @@
         <!-- Toolbar con pulsanti -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
-                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Salva_Click" 
+            IsEnabled="{Binding CanSave}"
+            Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
-                    Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
-                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+            Click="Annulla_Click" 
+            IsEnabled="{Binding CanCancel}"
+            Style="{StaticResource ActionButtonStyle}"/>
         </StackPanel>
 
         <!-- Contenuto principale -->

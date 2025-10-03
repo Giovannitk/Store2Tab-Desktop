@@ -1,230 +1,207 @@
-﻿using Store2Tab.ViewModels;
+﻿using Store2Tab.Data.Models;
+using Store2Tab.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Store2Tab.Views
 {
-    /// <summary>
-    /// Classe per i dati della scheda trasporto
-    /// </summary>
-    public class SchedaTrasportoData
-    {
-        // Dati Vettore
-        public string DatiVettore { get; set; } = string.Empty;
-        public string PartitaIvaVettore { get; set; } = string.Empty;
-        public string AlboAutotrasporto { get; set; } = string.Empty;
-
-        // Dati Committente
-        public string DatiCommittente { get; set; } = string.Empty;
-        public string PartitaIvaCommittente { get; set; } = string.Empty;
-
-        // Dati Caricatore
-        public string DatiCaricatore { get; set; } = string.Empty;
-        public string PartitaIvaCaricatore { get; set; } = string.Empty;
-
-        // Dati Proprietario Merce
-        public string DatiProprietarioMerce { get; set; } = string.Empty;
-        public string PartitaIvaProprietario { get; set; } = string.Empty;
-        public string EventualiDichiarazioni { get; set; } = string.Empty;
-
-        // Dati Merce Trasportata
-        public string TipologiaMerce { get; set; } = string.Empty;
-        public string QuantitaPeso { get; set; } = string.Empty;
-        public string LuogoCarico { get; set; } = string.Empty;
-        public string LuogoScarico { get; set; } = string.Empty;
-
-        // Dati Compilazione
-        public string LuogoCompilazione { get; set; } = string.Empty;
-        public string Compilatore { get; set; } = string.Empty;
-    }
-
     public partial class GestioneSchedaTrasportoView : UserControl
     {
-        private SchedaTrasportoData _currentData;
+        private SchedaTrasportoViewModel ViewModel => (SchedaTrasportoViewModel)DataContext;
+        private bool _isInitializing = false;
 
         public GestioneSchedaTrasportoView()
         {
             InitializeComponent();
+
             DataContext = new SchedaTrasportoViewModel();
-            _currentData = new SchedaTrasportoData();
 
-            // Inizializza con i placeholder
-            InitializePlaceholders();
+            Loaded += GestioneSchedaTrasportoView_Loaded;
         }
 
-        private void InitializePlaceholders()
+        private async void GestioneSchedaTrasportoView_Loaded(object sender, RoutedEventArgs e)
         {
-            // Imposta i placeholder text per aiutare l'utente
-            EventualiDichiarazioniTextBox.Text = "Eventuali dichiarazioni (in assenza di proprietario)";
-            EventualiDichiarazioniTextBox.GotFocus += (s, e) =>
+
+            if (ViewModel != null)
             {
-                if (EventualiDichiarazioniTextBox.Text == "Eventuali dichiarazioni (in assenza di proprietario)")
-                {
-                    EventualiDichiarazioniTextBox.Text = "";
-                }
-            };
-            EventualiDichiarazioniTextBox.LostFocus += (s, e) =>
+                await ViewModel.CaricaDatiDefaultAsync();
+                CaricaDatiNellaUI();
+                AggiungiEventHandlers();
+            }
+            else
             {
-                if (string.IsNullOrWhiteSpace(EventualiDichiarazioniTextBox.Text))
-                {
-                    EventualiDichiarazioniTextBox.Text = "Eventuali dichiarazioni (in assenza di proprietario)";
-                }
-            };
+                MessageBox.Show("ViewModel è NULL!");
+            }
         }
 
-        private void Salva_Click(object sender, RoutedEventArgs e)
+        private void AggiungiEventHandlers()
         {
+            // Aggiungi TextChanged a tutti i TextBox per segnare come modificato
+            DatiVettoreTextBox.TextChanged += TextBox_TextChanged;
+            PartitaIvaVettoreTextBox.TextChanged += TextBox_TextChanged;
+            AlboAutotrasportoTextBox.TextChanged += TextBox_TextChanged;
+            DatiCommittenteTextBox.TextChanged += TextBox_TextChanged;
+            PartitaIvaCommittenteTextBox.TextChanged += TextBox_TextChanged;
+            DatiCaricatoreTextBox.TextChanged += TextBox_TextChanged;
+            PartitaIvaCaricatoreTextBox.TextChanged += TextBox_TextChanged;
+            DatiProprietarioMerceTextBox.TextChanged += TextBox_TextChanged;
+            PartitaIvaProprietarioTextBox.TextChanged += TextBox_TextChanged;
+            EventualiDichiarazioniTextBox.TextChanged += TextBox_TextChanged;
+            TipologiaMerceTextBox.TextChanged += TextBox_TextChanged;
+            QuantitaPesoTextBox.TextChanged += TextBox_TextChanged;
+            LuogoCaricoTextBox.TextChanged += TextBox_TextChanged;
+            LuogoScaricoTextBox.TextChanged += TextBox_TextChanged;
+            LuogoCompilazioneTextBox.TextChanged += TextBox_TextChanged;
+            CompilatoreTextBox.TextChanged += TextBox_TextChanged;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isInitializing && ViewModel != null)
+            {
+                ViewModel.SegnaModificato();
+            }
+        }
+
+        private async void Salva_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel == null) return;
+
             // Raccogli i dati dai controlli
-            CollectDataFromControls();
+            var scheda = RaccoliDatiDaUI();
 
-            if (DataContext is SchedaTrasportoViewModel viewModel)
+            // Valida i dati
+            if (ViewModel.ValidaDatiScheda(scheda))
             {
-                // Valida i dati prima di salvare
-                if (ValidateData())
+                bool successo = await ViewModel.SalvaSchedaTrasportoAsync(scheda);
+
+                if (successo)
                 {
-                    viewModel.SalvaSchedaTrasporto();
-                }
-                else
-                {
-                    MessageBox.Show("Alcuni campi obbligatori sono vuoti. Controllare i dati inseriti.",
-                                  "Validazione", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Ricarica i dati aggiornati nella UI
+                    CaricaDatiNellaUI();
                 }
             }
         }
 
-        private void Cancella_Click(object sender, RoutedEventArgs e)
+        private async void Cancella_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is SchedaTrasportoViewModel viewModel)
+            if (ViewModel?.SchedaCorrente == null || ViewModel.SchedaCorrente.IdSchedaTrasporto == 0)
             {
-                var result = MessageBox.Show("Sei sicuro di voler cancellare la scheda trasporto corrente?",
-                    "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBox.Show("Nessuna scheda da cancellare.", "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-                if (result == MessageBoxResult.Yes)
-                {
-                    viewModel.CancellaSchedaTrasporto();
-                    ClearAllFields();
-                }
+            bool successo = await ViewModel.CancellaSchedaTrasportoAsync(ViewModel.SchedaCorrente.IdSchedaTrasporto);
+
+            if (successo)
+            {
+                PulisciCampi();
             }
         }
 
-        private void Annulla_Click(object sender, RoutedEventArgs e)
+        private async void Annulla_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is SchedaTrasportoViewModel viewModel)
-            {
-                var result = MessageBox.Show("Sei sicuro di voler annullare le modifiche?",
-                    "Conferma Annulla", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (ViewModel == null) return;
 
-                if (result == MessageBoxResult.Yes)
-                {
-                    viewModel.AnnullaModifiche();
-                    ClearAllFields();
-                }
+            await ViewModel.AnnullaModificheAsync();
+            CaricaDatiNellaUI();
+        }
+
+        private SchedaTrasporto RaccoliDatiDaUI()
+        {
+            var scheda = ViewModel?.SchedaCorrente ?? new SchedaTrasporto();
+
+            scheda.VettoreDescrizione = DatiVettoreTextBox.Text ?? string.Empty;
+            scheda.VettorePartitaIva = PartitaIvaVettoreTextBox.Text ?? string.Empty;
+            scheda.VettoreAlboAutotrasportatori = AlboAutotrasportoTextBox.Text ?? string.Empty;
+            scheda.CommittenteDescrizione = DatiCommittenteTextBox.Text ?? string.Empty;
+            scheda.CommittentePartitaIva = PartitaIvaCommittenteTextBox.Text ?? string.Empty;
+            scheda.CaricatoreDescrizione = DatiCaricatoreTextBox.Text ?? string.Empty;
+            scheda.CaricatorePartitaIva = PartitaIvaCaricatoreTextBox.Text ?? string.Empty;
+            scheda.ProprietarioDescrizione = DatiProprietarioMerceTextBox.Text ?? string.Empty;
+            scheda.ProprietarioPartitaIva = PartitaIvaProprietarioTextBox.Text ?? string.Empty;
+
+            // Gestione placeholder per Dichiarazioni
+            var dichiarazioni = EventualiDichiarazioniTextBox.Text ?? string.Empty;
+            scheda.Dichiarazioni = dichiarazioni == "Eventuali dichiarazioni (in assenza di proprietario)"
+                ? string.Empty
+                : dichiarazioni;
+
+            scheda.MerceTipologia = TipologiaMerceTextBox.Text ?? string.Empty;
+            scheda.MerceQuantitaPeso = QuantitaPesoTextBox.Text ?? string.Empty;
+            scheda.MerceLuogoCarico = LuogoCaricoTextBox.Text ?? string.Empty;
+            scheda.MerceLuogoScarico = LuogoScaricoTextBox.Text ?? string.Empty;
+            scheda.Luogo = LuogoCompilazioneTextBox.Text ?? string.Empty;
+            scheda.Compilatore = CompilatoreTextBox.Text ?? string.Empty;
+
+            return scheda;
+        }
+
+        private void CaricaDatiNellaUI()
+        {
+            if (ViewModel?.SchedaCorrente == null) return;
+
+            _isInitializing = true;
+
+            try
+            {
+                var scheda = ViewModel.SchedaCorrente;
+
+                DatiVettoreTextBox.Text = scheda.VettoreDescrizione;
+                PartitaIvaVettoreTextBox.Text = scheda.VettorePartitaIva;
+                AlboAutotrasportoTextBox.Text = scheda.VettoreAlboAutotrasportatori;
+                DatiCommittenteTextBox.Text = scheda.CommittenteDescrizione;
+                PartitaIvaCommittenteTextBox.Text = scheda.CommittentePartitaIva;
+                DatiCaricatoreTextBox.Text = scheda.CaricatoreDescrizione;
+                PartitaIvaCaricatoreTextBox.Text = scheda.CaricatorePartitaIva;
+                DatiProprietarioMerceTextBox.Text = scheda.ProprietarioDescrizione;
+                PartitaIvaProprietarioTextBox.Text = scheda.ProprietarioPartitaIva;
+
+                // Gestione placeholder per Dichiarazioni
+                EventualiDichiarazioniTextBox.Text = string.IsNullOrWhiteSpace(scheda.Dichiarazioni)
+                    ? "Eventuali dichiarazioni (in assenza di proprietario)"
+                    : scheda.Dichiarazioni;
+
+                TipologiaMerceTextBox.Text = scheda.MerceTipologia;
+                QuantitaPesoTextBox.Text = scheda.MerceQuantitaPeso;
+                LuogoCaricoTextBox.Text = scheda.MerceLuogoCarico;
+                LuogoScaricoTextBox.Text = scheda.MerceLuogoScarico;
+                LuogoCompilazioneTextBox.Text = scheda.Luogo;
+                CompilatoreTextBox.Text = scheda.Compilatore;
+            }
+            finally
+            {
+                _isInitializing = false;
             }
         }
 
-        private void CollectDataFromControls()
+        private void PulisciCampi()
         {
-            _currentData.DatiVettore = DatiVettoreTextBox.Text;
-            _currentData.PartitaIvaVettore = PartitaIvaVettoreTextBox.Text;
-            _currentData.AlboAutotrasporto = AlboAutotrasportoTextBox.Text;
+            _isInitializing = true;
 
-            _currentData.DatiCommittente = DatiCommittenteTextBox.Text;
-            _currentData.PartitaIvaCommittente = PartitaIvaCommittenteTextBox.Text;
-
-            _currentData.DatiCaricatore = DatiCaricatoreTextBox.Text;
-            _currentData.PartitaIvaCaricatore = PartitaIvaCaricatoreTextBox.Text;
-
-            _currentData.DatiProprietarioMerce = DatiProprietarioMerceTextBox.Text;
-            _currentData.PartitaIvaProprietario = PartitaIvaProprietarioTextBox.Text;
-            _currentData.EventualiDichiarazioni = EventualiDichiarazioniTextBox.Text;
-
-            _currentData.TipologiaMerce = TipologiaMerceTextBox.Text;
-            _currentData.QuantitaPeso = QuantitaPesoTextBox.Text;
-            _currentData.LuogoCarico = LuogoCaricoTextBox.Text;
-            _currentData.LuogoScarico = LuogoScaricoTextBox.Text;
-
-            _currentData.LuogoCompilazione = LuogoCompilazioneTextBox.Text;
-            _currentData.Compilatore = CompilatoreTextBox.Text;
-        }
-
-        private bool ValidateData()
-        {
-            // Verifica che almeno i campi principali siano compilati
-            bool isValid = true;
-
-            if (string.IsNullOrWhiteSpace(DatiVettoreTextBox.Text))
-                isValid = false;
-
-            if (string.IsNullOrWhiteSpace(DatiCommittenteTextBox.Text))
-                isValid = false;
-
-            if (string.IsNullOrWhiteSpace(TipologiaMerceTextBox.Text))
-                isValid = false;
-
-            if (string.IsNullOrWhiteSpace(LuogoCaricoTextBox.Text))
-                isValid = false;
-
-            if (string.IsNullOrWhiteSpace(LuogoScaricoTextBox.Text))
-                isValid = false;
-
-            return isValid;
-        }
-
-        private void ClearAllFields()
-        {
-            // Pulisce tutti i campi
-            DatiVettoreTextBox.Text = "";
-            PartitaIvaVettoreTextBox.Text = "";
-            AlboAutotrasportoTextBox.Text = "";
-
-            DatiCommittenteTextBox.Text = "";
-            PartitaIvaCommittenteTextBox.Text = "";
-
-            DatiCaricatoreTextBox.Text = "";
-            PartitaIvaCaricatoreTextBox.Text = "";
-
-            DatiProprietarioMerceTextBox.Text = "";
-            PartitaIvaProprietarioTextBox.Text = "";
-            EventualiDichiarazioniTextBox.Text = "Eventuali dichiarazioni (in assenza di proprietario)";
-
-            TipologiaMerceTextBox.Text = "";
-            QuantitaPesoTextBox.Text = "";
-            LuogoCaricoTextBox.Text = "";
-            LuogoScaricoTextBox.Text = "";
-
-            LuogoCompilazioneTextBox.Text = "";
-            CompilatoreTextBox.Text = "";
-
-            _currentData = new SchedaTrasportoData();
-        }
-
-        public void LoadSchedaTrasporto(SchedaTrasportoData data)
-        {
-            if (data == null) return;
-
-            DatiVettoreTextBox.Text = data.DatiVettore;
-            PartitaIvaVettoreTextBox.Text = data.PartitaIvaVettore;
-            AlboAutotrasportoTextBox.Text = data.AlboAutotrasporto;
-
-            DatiCommittenteTextBox.Text = data.DatiCommittente;
-            PartitaIvaCommittenteTextBox.Text = data.PartitaIvaCommittente;
-
-            DatiCaricatoreTextBox.Text = data.DatiCaricatore;
-            PartitaIvaCaricatoreTextBox.Text = data.PartitaIvaCaricatore;
-
-            DatiProprietarioMerceTextBox.Text = data.DatiProprietarioMerce;
-            PartitaIvaProprietarioTextBox.Text = data.PartitaIvaProprietario;
-            EventualiDichiarazioniTextBox.Text = data.EventualiDichiarazioni;
-
-            TipologiaMerceTextBox.Text = data.TipologiaMerce;
-            QuantitaPesoTextBox.Text = data.QuantitaPeso;
-            LuogoCaricoTextBox.Text = data.LuogoCarico;
-            LuogoScaricoTextBox.Text = data.LuogoScarico;
-
-            LuogoCompilazioneTextBox.Text = data.LuogoCompilazione;
-            CompilatoreTextBox.Text = data.Compilatore;
-
-            _currentData = data;
+            try
+            {
+                DatiVettoreTextBox.Text = string.Empty;
+                PartitaIvaVettoreTextBox.Text = string.Empty;
+                AlboAutotrasportoTextBox.Text = string.Empty;
+                DatiCommittenteTextBox.Text = string.Empty;
+                PartitaIvaCommittenteTextBox.Text = string.Empty;
+                DatiCaricatoreTextBox.Text = string.Empty;
+                PartitaIvaCaricatoreTextBox.Text = string.Empty;
+                DatiProprietarioMerceTextBox.Text = string.Empty;
+                PartitaIvaProprietarioTextBox.Text = string.Empty;
+                EventualiDichiarazioniTextBox.Text = "Eventuali dichiarazioni (in assenza di proprietario)";
+                TipologiaMerceTextBox.Text = string.Empty;
+                QuantitaPesoTextBox.Text = string.Empty;
+                LuogoCaricoTextBox.Text = string.Empty;
+                LuogoScaricoTextBox.Text = string.Empty;
+                LuogoCompilazioneTextBox.Text = string.Empty;
+                CompilatoreTextBox.Text = string.Empty;
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
         }
     }
 }

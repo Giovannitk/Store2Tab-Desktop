@@ -26,11 +26,11 @@
             <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
                     Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
-                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
+                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}" IsEnabled="{Binding CanSaveOrCancel}"/>
             <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
                     Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
             <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
-                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}" IsEnabled="{Binding CanSaveOrCancel}"/>
         </StackPanel>
 
         <!-- Sezione filtri ricerca -->
@@ -72,7 +72,9 @@
                       GridLinesVisibility="Horizontal" HeadersVisibility="Column"
                       BorderBrush="#FF434346" BorderThickness="1"
                       SelectionChanged="DataGrid_SelectionChanged"
-                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30">
+                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30"
+                      IsReadOnly="False"
+                      ItemsSource="{Binding Documenti}">
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
@@ -86,8 +88,12 @@
                 </DataGrid.ColumnHeaderStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Numerazione (descrizione)" Binding="{Binding Descrizione}" Width="200"/>
-                    <DataGridTextColumn Header="Sigla" Binding="{Binding Sigla}" Width="80"/>
+                    <DataGridCheckBoxColumn Header="✓" Binding="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="30"/>
+                    <DataGridTextColumn Header="Numerazione (descrizione)" Binding="{Binding Descrizione}" Width="200" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Sigla" Binding="{Binding Sigla}" Width="80" IsReadOnly="True"/>
+                    <DataGridCheckBoxColumn Header="Elettr." Binding="{Binding DocumentoElettronico}" Width="60" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="FE Tipo" Binding="{Binding FETipoDoc}" Width="80" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Stampa" Binding="{Binding DocEmessoTipoStampa}" Width="120" IsReadOnly="True"/>
                 </DataGrid.Columns>
 
                 <DataGrid.Items>
@@ -102,14 +108,17 @@
                           Height="70" Margin="0,0,0,15">
                     <TextBox Name="CodiceTextBox" Height="25" Width="100" 
                              HorizontalAlignment="Left" VerticalAlignment="Top"
-                             Style="{StaticResource ModernTextBox}"/>
+                             Style="{StaticResource ModernTextBox}" IsReadOnly="True"
+                             Text="{Binding Codice}"/>
                 </GroupBox>
 
                 <!-- Numerazione (descrizione) -->
                 <GroupBox Header="Numerazione (descrizione)" Style="{StaticResource ModernGroupBox}" 
                           Height="70" Margin="0,0,0,15">
                     <TextBox Name="NumerazioneDescrizioneTextBox" Height="25" 
-                             VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                             VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                             Text="{Binding Descrizione, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="25"/>
                 </GroupBox>
 
                 <!-- Sigla -->
@@ -117,7 +126,9 @@
                           Height="70" Margin="0,0,0,15">
                     <TextBox Name="SiglaTextBox" Height="25" Width="100"
                              HorizontalAlignment="Left" VerticalAlignment="Top"
-                             Style="{StaticResource ModernTextBox}"/>
+                             Style="{StaticResource ModernTextBox}"
+                             Text="{Binding Sigla, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="5"/>
                 </GroupBox>
 
                 <!-- Documento Elettronico e Tipo -->
@@ -130,15 +141,26 @@
                     <!-- Checkbox Documento Elettronico -->
                     <CheckBox Grid.Row="0" Name="DocumentoElettronicoCheckBox" 
                               Content="Documento Elettronico?" Foreground="White"
-                              Margin="0,0,0,10" VerticalAlignment="Center"/>
+                              Margin="0,0,0,10" VerticalAlignment="Center"
+                              IsChecked="{Binding DocumentoElettronico, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <!-- Tipo documento elettronico -->
                     <GroupBox Grid.Row="1" Header="Tipo documento elettronico" 
                               Style="{StaticResource ModernGroupBox}" Height="70">
                         <TextBox Name="TipoDocumentoElettronicoTextBox" Height="25" 
-                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
+                                 VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                                 Text="{Binding FETipoDoc, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="5"/>
                     </GroupBox>
                 </Grid>
+
+                <!-- Stampa -->
+                <GroupBox Header="Stampa" Style="{StaticResource ModernGroupBox}" 
+                          Height="70" Margin="0,0,0,15">
+                    <TextBox Name="StampaTextBox" Height="25"
+                             VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"
+                             Text="{Binding DocEmessoTipoStampa, UpdateSourceTrigger=PropertyChanged}"/>
+                </GroupBox>
 
             </StackPanel>
         </Grid>

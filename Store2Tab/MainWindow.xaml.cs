@@ -754,7 +754,7 @@ namespace Store2Tab
                 Tag = "NUMERAZIONEORDINI",
                 HeaderTemplate = (DataTemplate)MainTabControl.Resources["ClosableTabHeaderTemplate"]
             };
-            var numerazioneOrdiniView = new Views.GestioneNumerazioneOrdiniView(); // Temporaneo
+            var numerazioneOrdiniView = new Views.GestioneNumerazioneOrdiniView();
             tabItem.Content = numerazioneOrdiniView;
             MainTabControl.Items.Add(tabItem);
             MainTabControl.SelectedItem = tabItem;

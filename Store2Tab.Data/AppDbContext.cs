@@ -21,6 +21,10 @@ namespace Store2Tab.Data
         public DbSet<TipiAttivita> TipiAttivita { get; set; }
         public DbSet<NotaDocumento> NotaDocumento { get; set; }
         public DbSet<Protocollo> Protocolli { get; set; }
+        public DbSet<ProtocolloContatore> ProtocolliContatori { get; set; }
+        public DbSet<SchedaTrasporto> SchedeTrasporto { get; set; }
+        public DbSet<NumerazioneOrdini> OrdineNumerazione { get; set; }
+        public DbSet<DocEmessoNumerazione> DocEmessoNumerazioni { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -417,6 +421,210 @@ namespace Store2Tab.Data
                     .HasColumnName("Protocollo");
                 // Configurato il nome della tabella
                 entity.ToTable("TProtocollo");
+            });
+            #endregion
+
+            #region ProtocolliContatori
+            modelBuilder.Entity<ProtocolloContatore>(entity =>
+            {
+                // Configurazione chiave primaria composta
+                entity.HasKey(e => new { e.IdProtocollo, e.Esercizio });
+
+                entity.Property(e => e.IdProtocollo)
+                    .HasColumnName("IdProtocollo");
+
+                entity.Property(e => e.Esercizio)
+                    .HasColumnName("Esercizio");
+
+                entity.Property(e => e.Contatore)
+                    .IsRequired()
+                    .HasDefaultValue(0)
+                    .HasColumnName("Contatore");
+
+                // Configurazione relazione con Protocollo
+                entity.HasOne(e => e.Protocollo)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdProtocollo)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.ToTable("TProtocolloContatore");
+            });
+            #endregion
+
+            #region SchedaTrasporto
+            modelBuilder.Entity<SchedaTrasporto>(entity =>
+            {
+                // Configura la chiave primaria
+                entity.HasKey(e => e.IdSchedaTrasporto);
+
+                // IMPORTANTE: Configura l'ID come IDENTITY (auto-incremento)
+                entity.Property(e => e.IdSchedaTrasporto)
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("IdSchedaTrasporto");
+
+                // Dati Vettore
+                entity.Property(e => e.VettoreDescrizione)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .HasDefaultValue("")
+                    .HasColumnName("Vettore_Descrizione");
+
+                entity.Property(e => e.VettorePartitaIva)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("")
+                    .HasColumnName("Vettore_PartitaIva");
+
+                entity.Property(e => e.VettoreAlboAutotrasportatori)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("")
+                    .HasColumnName("Vettore_AlboAutotrasportatori");
+
+                // Dati Committente
+                entity.Property(e => e.CommittenteDescrizione)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .HasDefaultValue("")
+                    .HasColumnName("Committente_Descrizione");
+
+                entity.Property(e => e.CommittentePartitaIva)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("")
+                    .HasColumnName("Committente_PartitaIva");
+
+                // Dati Caricatore
+                entity.Property(e => e.CaricatoreDescrizione)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .HasDefaultValue("")
+                    .HasColumnName("Caricatore_Descrizione");
+
+                entity.Property(e => e.CaricatorePartitaIva)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("")
+                    .HasColumnName("Caricatore_PartitaIva");
+
+                // Dati Proprietario
+                entity.Property(e => e.ProprietarioDescrizione)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .HasDefaultValue("")
+                    .HasColumnName("Proprietario_Descrizione");
+
+                entity.Property(e => e.ProprietarioPartitaIva)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("")
+                    .HasColumnName("Proprietario_PartitaIva");
+
+                entity.Property(e => e.Dichiarazioni)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .HasDefaultValue("")
+                    .HasColumnName("Dichiarazioni");
+
+                // Dati Merce
+                entity.Property(e => e.MerceTipologia)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Merce_Tipologia");
+
+                entity.Property(e => e.MerceQuantitaPeso)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Merce_QuantitaPeso");
+
+                entity.Property(e => e.MerceLuogoCarico)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Merce_LuogoCarico");
+
+                entity.Property(e => e.MerceLuogoScarico)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Merce_LuogoScarico");
+
+                // Dati Compilazione
+                entity.Property(e => e.Luogo)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Luogo");
+
+                entity.Property(e => e.Compilatore)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasDefaultValue("")
+                    .HasColumnName("Compilatore");
+
+                // Configura il nome della tabella
+                entity.ToTable("TSchedaTrasporto");
+            });
+            #endregion
+
+            #region NumerazioneOrdini
+            modelBuilder.Entity<NumerazioneOrdini>(entity =>
+            {
+                entity.ToTable("TOrdineNumerazione");
+                entity.HasKey(e => e.IdOrdineNumerazione);
+                entity.Property(e => e.IdOrdineNumerazione)
+                    .HasColumnName("IdOrdineNumerazione")
+                    .ValueGeneratedOnAdd();
+                entity.Property(e => e.OrdineNumerazione)
+                    .HasColumnName("OrdineNumerazione")
+                    .HasMaxLength(25)
+                    .IsRequired();
+                entity.Property(e => e.NumerazioneSigla)
+                    .HasColumnName("NumerazioneSigla")
+                    .HasMaxLength(5);
+                entity.Property(e => e.DefaultCliente)
+                    .HasColumnName("DefaultCliente");
+                entity.Property(e => e.DefaultFornitore)
+                    .HasColumnName("DefaultFornitore");
+                entity.Property(e => e.StampaDestinatarioTel)
+                    .HasColumnName("Stampa_DestinatarioTel");
+                entity.Property(e => e.StampaLogo)
+                    .HasColumnName("Stampa_Logo")
+                    .HasMaxLength(50);
+                entity.Property(e => e.StampaCodiciArticolo)
+                    .HasColumnName("Stampa_CodiciArticolo");
+            });
+            #endregion
+
+            #region DocEmessoNumerazioni
+            modelBuilder.Entity<DocEmessoNumerazione>(entity =>
+            {
+                entity.ToTable("TDocEmessoNumerazione");
+                entity.HasKey(e => e.IdDocEmessoNumerazione);
+                entity.Property(e => e.IdDocEmessoNumerazione)
+                    .HasColumnName("IdDocEmessoNumerazione")
+                    .ValueGeneratedOnAdd();
+                entity.Property(e => e.DocEmessoNumerazioneDescrizione)
+                    .HasColumnName("DocEmessoNumerazione")
+                    .HasMaxLength(25)
+                    .IsRequired();
+                entity.Property(e => e.NumerazioneSigla)
+                    .HasColumnName("NumerazioneSigla")
+                    .HasMaxLength(5)
+                    .IsRequired();
+                entity.Property(e => e.DocumentoElettronico)
+                    .HasColumnName("DocumentoElettronico")
+                    .IsRequired();
+                entity.Property(e => e.FE_TipoDoc)
+                    .HasColumnName("FE_TipoDoc")
+                    .HasMaxLength(5)
+                    .IsRequired();
+                entity.Property(e => e.DocEmessoTipo_Stampa)
+                    .HasColumnName("DocEmessoTipo_Stampa")
+                    .HasMaxLength(50)
+                    .IsRequired();
             });
             #endregion
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -9,45 +9,38 @@ using Store2Tab.Core.Interfaces;
 using Store2Tab.Core.Services;
 using Store2Tab.Data;
 using Store2Tab.Data.Models;
-using Store2Tab.Views;
 
 namespace Store2Tab.ViewModels
 {
-    public class NumerazioneOrdiniViewModel : INotifyPropertyChanged
+    public class DocEmessoNumerazioneViewModel : INotifyPropertyChanged
     {
-        private readonly IOrdineNumerazioneService _service;
-        private NumerazioneOrdini? _currentEntity;
+        private readonly IDocEmessoNumerazioneService _service;
+        private DocEmessoNumerazione? _currentEntity;
         private bool _isDirty;
         private bool _isInEditMode;
         private bool _isLoading;
+
         private string _codice = string.Empty;
         private string _descrizione = string.Empty;
         private string _sigla = string.Empty;
-        private string _stampaTelefonoCliente = "0";
-        private bool _isDefaultCliente;
-        private bool _isDefaultFornitore;
+        private bool _documentoElettronico;
+        private string _feTipoDoc = string.Empty;
+        private string _stampa = string.Empty;
+
         private string _codiceRicerca = string.Empty;
         private string _descrizioneRicerca = string.Empty;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public NumerazioneOrdiniViewModel()
+        public DocEmessoNumerazioneViewModel()
         {
             var factory = new DefaultAppDbContextFactory();
-            _service = new OrdineNumerazioneService(factory);
-            Numerazioni = new ObservableCollection<NumerazioneOrdiniItem>();
-            ElementiSelezionati = new ObservableCollection<NumerazioneOrdiniItem>();
+            _service = new DocEmessoNumerazioneService(factory);
+            Documenti = new ObservableCollection<DocEmessoNumerazioneItem>();
             _ = LoadDataAsync();
         }
 
-        public ObservableCollection<NumerazioneOrdiniItem> Numerazioni { get; }
-
-        private ObservableCollection<NumerazioneOrdiniItem> _elementiSelezionati = new ObservableCollection<NumerazioneOrdiniItem>();
-        public ObservableCollection<NumerazioneOrdiniItem> ElementiSelezionati
-        {
-            get => _elementiSelezionati;
-            set { _elementiSelezionati = value; OnPropertyChanged(); }
-        }
+        public ObservableCollection<DocEmessoNumerazioneItem> Documenti { get; }
 
         public bool IsDirty
         {
@@ -95,110 +88,49 @@ namespace Store2Tab.ViewModels
         public string Codice
         {
             get => _codice;
-            set
-            {
-                if (_codice != value)
-                {
-                    _codice = value;
-                    OnPropertyChanged();
-                }
-            }
+            set { if (_codice != value) { _codice = value; OnPropertyChanged(); } }
         }
 
         public string Descrizione
         {
             get => _descrizione;
-            set
-            {
-                if (_descrizione != value)
-                {
-                    _descrizione = value;
-                    OnPropertyChanged();
-                    MarkAsModified();
-                }
-            }
+            set { if (_descrizione != value) { _descrizione = value; OnPropertyChanged(); MarkAsModified(); } }
         }
 
         public string Sigla
         {
             get => _sigla;
-            set
-            {
-                if (_sigla != value)
-                {
-                    _sigla = value;
-                    OnPropertyChanged();
-                    MarkAsModified();
-                }
-            }
+            set { if (_sigla != value) { _sigla = value; OnPropertyChanged(); MarkAsModified(); } }
         }
 
-        public string StampaTelefonoCliente
+        public bool DocumentoElettronico
         {
-            get => _stampaTelefonoCliente;
-            set
-            {
-                if (_stampaTelefonoCliente != value)
-                {
-                    _stampaTelefonoCliente = value;
-                    OnPropertyChanged();
-                    MarkAsModified();
-                }
-            }
+            get => _documentoElettronico;
+            set { if (_documentoElettronico != value) { _documentoElettronico = value; OnPropertyChanged(); MarkAsModified(); } }
         }
 
-        public bool IsDefaultCliente
+        public string FETipoDoc
         {
-            get => _isDefaultCliente;
-            set
-            {
-                if (_isDefaultCliente != value)
-                {
-                    _isDefaultCliente = value;
-                    OnPropertyChanged();
-                    MarkAsModified();
-                }
-            }
+            get => _feTipoDoc;
+            set { if (_feTipoDoc != value) { _feTipoDoc = value; OnPropertyChanged(); MarkAsModified(); } }
         }
 
-        public bool IsDefaultFornitore
+        public string DocEmessoTipoStampa
         {
-            get => _isDefaultFornitore;
-            set
-            {
-                if (_isDefaultFornitore != value)
-                {
-                    _isDefaultFornitore = value;
-                    OnPropertyChanged();
-                    MarkAsModified();
-                }
-            }
+            get => _stampa;
+            set { if (_stampa != value) { _stampa = value; OnPropertyChanged(); MarkAsModified(); } }
         }
 
         public string CodiceRicerca
         {
             get => _codiceRicerca;
-            set
-            {
-                if (_codiceRicerca != value)
-                {
-                    _codiceRicerca = value;
-                    OnPropertyChanged();
-                }
-            }
+            set { if (_codiceRicerca != value) { _codiceRicerca = value; OnPropertyChanged(); } }
         }
 
         public string DescrizioneRicerca
         {
             get => _descrizioneRicerca;
-            set
-            {
-                if (_descrizioneRicerca != value)
-                {
-                    _descrizioneRicerca = value;
-                    OnPropertyChanged();
-                }
-            }
+            set { if (_descrizioneRicerca != value) { _descrizioneRicerca = value; OnPropertyChanged(); } }
         }
 
         private void MarkAsModified()
@@ -216,15 +148,17 @@ namespace Store2Tab.ViewModels
             {
                 IsLoading = true;
                 var data = await _service.GetAllAsync();
-                Numerazioni.Clear();
+                Documenti.Clear();
                 foreach (var item in data)
                 {
-                    Numerazioni.Add(new NumerazioneOrdiniItem
+                    Documenti.Add(new DocEmessoNumerazioneItem
                     {
-                        Codice = item.IdOrdineNumerazione.ToString(),
-                        Descrizione = item.OrdineNumerazione,
+                        Codice = item.IdDocEmessoNumerazione.ToString(),
+                        Descrizione = item.DocEmessoNumerazioneDescrizione,
                         Sigla = item.NumerazioneSigla,
-                        StampaTelefonoCliente = item.StampaDestinatarioTel.ToString(),
+                        DocumentoElettronico = item.DocumentoElettronico == 1,
+                        FETipoDoc = item.FE_TipoDoc,
+                        DocEmessoTipoStampa = item.DocEmessoTipo_Stampa,
                         IsSelected = false
                     });
                 }
@@ -252,7 +186,7 @@ namespace Store2Tab.ViewModels
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    await SalvaNumerazioneAsync();
+                    await SalvaAsync();
                     if (IsInEditMode) return;
                 }
                 else if (result == MessageBoxResult.Cancel)
@@ -265,19 +199,19 @@ namespace Store2Tab.ViewModels
             Codice = string.Empty;
             Descrizione = string.Empty;
             Sigla = string.Empty;
-            StampaTelefonoCliente = "0";
-            IsDefaultCliente = false;
-            IsDefaultFornitore = false;
+            DocumentoElettronico = false;
+            FETipoDoc = string.Empty;
+            DocEmessoTipoStampa = string.Empty;
             IsDirty = false;
             IsInEditMode = true;
         }
 
         public async void SalvaNumerazione()
         {
-            await SalvaNumerazioneAsync();
+            await SalvaAsync();
         }
 
-        private async Task<bool> SalvaNumerazioneAsync()
+        private async Task<bool> SalvaAsync()
         {
             try
             {
@@ -288,54 +222,52 @@ namespace Store2Tab.ViewModels
                 }
 
                 IsLoading = true;
-                byte stampaTel = 0;
-                if (!string.IsNullOrEmpty(StampaTelefonoCliente) && byte.TryParse(StampaTelefonoCliente, out byte temp))
-                {
-                    stampaTel = temp;
-                }
+                var isNew = _currentEntity == null;
 
-                var isNuovo = _currentEntity == null;
-
-                if (isNuovo)
+                if (isNew)
                 {
-                    var nuova = new NumerazioneOrdini
+                    var nuova = new DocEmessoNumerazione
                     {
-                        OrdineNumerazione = Descrizione,
+                        DocEmessoNumerazioneDescrizione = Descrizione,
                         NumerazioneSigla = Sigla ?? string.Empty,
-                        DefaultCliente = (byte)(IsDefaultCliente ? 1 : 0),
-                        DefaultFornitore = (byte)(IsDefaultFornitore ? 1 : 0),
-                        StampaDestinatarioTel = stampaTel
+                        DocumentoElettronico = (byte)(DocumentoElettronico ? 1 : 0),
+                        FE_TipoDoc = FETipoDoc ?? string.Empty,
+                        DocEmessoTipo_Stampa = DocEmessoTipoStampa ?? string.Empty
                     };
 
                     var created = await _service.CreateAsync(nuova);
                     _currentEntity = created;
-                    Codice = created.IdOrdineNumerazione.ToString();
+                    Codice = created.IdDocEmessoNumerazione.ToString();
 
-                    Numerazioni.Add(new NumerazioneOrdiniItem
+                    Documenti.Add(new DocEmessoNumerazioneItem
                     {
                         Codice = Codice,
                         Descrizione = Descrizione,
                         Sigla = Sigla,
-                        StampaTelefonoCliente = StampaTelefonoCliente,
+                        DocumentoElettronico = DocumentoElettronico,
+                        FETipoDoc = FETipoDoc,
+                        DocEmessoTipoStampa = DocEmessoTipoStampa,
                         IsSelected = false
                     });
                 }
                 else
                 {
-                    _currentEntity.OrdineNumerazione = Descrizione;
+                    _currentEntity.DocEmessoNumerazioneDescrizione = Descrizione;
                     _currentEntity.NumerazioneSigla = Sigla ?? string.Empty;
-                    _currentEntity.DefaultCliente = (byte)(IsDefaultCliente ? 1 : 0);
-                    _currentEntity.DefaultFornitore = (byte)(IsDefaultFornitore ? 1 : 0);
-                    _currentEntity.StampaDestinatarioTel = stampaTel;
+                    _currentEntity.DocumentoElettronico = (byte)(DocumentoElettronico ? 1 : 0);
+                    _currentEntity.FE_TipoDoc = FETipoDoc ?? string.Empty;
+                    _currentEntity.DocEmessoTipo_Stampa = DocEmessoTipoStampa ?? string.Empty;
 
                     await _service.UpdateAsync(_currentEntity);
 
-                    var existingItem = Numerazioni.FirstOrDefault(n => n.Codice == Codice);
+                    var existingItem = Documenti.FirstOrDefault(n => n.Codice == Codice);
                     if (existingItem != null)
                     {
                         existingItem.Descrizione = Descrizione;
                         existingItem.Sigla = Sigla;
-                        existingItem.StampaTelefonoCliente = StampaTelefonoCliente;
+                        existingItem.DocumentoElettronico = DocumentoElettronico;
+                        existingItem.FETipoDoc = FETipoDoc;
+                        existingItem.DocEmessoTipoStampa = DocEmessoTipoStampa;
                     }
                 }
 
@@ -359,6 +291,70 @@ namespace Store2Tab.ViewModels
         {
             try
             {
+                // Selezioni multiple
+                var selezionati = Documenti.Where(d => d.IsSelected).ToList();
+                if (selezionati.Count > 1)
+                {
+                    var confermaMultipla = MessageBox.Show("Si sta per procedere alla cancellazione di più numerazioni. Confermare l'operazione.",
+                        "Conferma", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                    if (confermaMultipla != MessageBoxResult.OK) return;
+
+                    IsLoading = true;
+                    var risultati = new System.Collections.Generic.List<string>();
+                    var cancellate = new System.Collections.Generic.List<DocEmessoNumerazioneItem>();
+                    foreach (var num in selezionati)
+                    {
+                        var conferma = MessageBox.Show($"Cancellare la numerazione:\n\nCodice: {num.Codice}\nDescrizione: {num.Descrizione}",
+                            "Conferma Cancellazione", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                        if (conferma == MessageBoxResult.Cancel) break;
+                        if (conferma == MessageBoxResult.Yes)
+                        {
+                            try
+                            {
+                                if (short.TryParse(num.Codice, out short id) && id > 0)
+                                {
+                                    await _service.DeleteAsync(id);
+                                    cancellate.Add(num);
+                                    risultati.Add($"✓ {num.Descrizione} - Cancellato");
+                                }
+                                else
+                                {
+                                    risultati.Add($"✗ {num.Descrizione} - ID non valido");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                risultati.Add($"✗ {num.Descrizione} - Errore: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            risultati.Add($"○ {num.Descrizione} - Saltato");
+                        }
+                    }
+
+                    foreach (var num in cancellate)
+                    {
+                        Documenti.Remove(num);
+                    }
+
+                    // Reset dettagli
+                    Codice = string.Empty;
+                    Descrizione = string.Empty;
+                    Sigla = string.Empty;
+                    DocumentoElettronico = false;
+                    FETipoDoc = string.Empty;
+                    DocEmessoTipoStampa = string.Empty;
+                    IsDirty = false;
+                    IsInEditMode = false;
+
+                    IsLoading = false;
+
+                    MessageBox.Show("Riepilogo cancellazione multipla:\n\n" + string.Join("\n", risultati),
+                        "Riepilogo Cancellazione", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
                 if (string.IsNullOrEmpty(Codice))
                 {
                     MessageBox.Show("Nessuna numerazione selezionata.", "Avviso", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -378,18 +374,18 @@ namespace Store2Tab.ViewModels
                     if (short.TryParse(Codice, out short id))
                     {
                         await _service.DeleteAsync(id);
-                        var item = Numerazioni.FirstOrDefault(n => n.Codice == Codice);
+                        var item = Documenti.FirstOrDefault(n => n.Codice == Codice);
                         if (item != null)
                         {
-                            Numerazioni.Remove(item);
+                            Documenti.Remove(item);
                         }
 
                         Codice = string.Empty;
                         Descrizione = string.Empty;
                         Sigla = string.Empty;
-                        StampaTelefonoCliente = "0";
-                        IsDefaultCliente = false;
-                        IsDefaultFornitore = false;
+                        DocumentoElettronico = false;
+                        FETipoDoc = string.Empty;
+                        DocEmessoTipoStampa = string.Empty;
                         IsDirty = false;
                         IsInEditMode = false;
 
@@ -407,101 +403,6 @@ namespace Store2Tab.ViewModels
             }
         }
 
-        public async void CancellaMultiple(System.Collections.Generic.List<NumerazioneOrdiniItem> numerazioniSelezionate)
-        {
-            if (numerazioniSelezionate == null || numerazioniSelezionate.Count == 0)
-            {
-                MessageBox.Show("Nessuna numerazione selezionata per la cancellazione.",
-                    "Attenzione", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            try
-            {
-                IsLoading = true;
-                var risultatiCancellazione = new System.Collections.Generic.List<string>();
-                var numerazioniCancellate = new System.Collections.Generic.List<NumerazioneOrdiniItem>();
-                var numerazioniNonCancellate = new System.Collections.Generic.List<NumerazioneOrdiniItem>();
-
-                foreach (var num in numerazioniSelezionate)
-                {
-                    var conferma = MessageBox.Show(
-                        $"Cancellare la numerazione:\n\n" +
-                        $"Codice: {num.Codice}\n" +
-                        $"Descrizione: {num.Descrizione}\n\n" +
-                        $"Rimanenti da confermare: {numerazioniSelezionate.Count - numerazioniSelezionate.IndexOf(num) - 1}",
-                        "Conferma Cancellazione",
-                        MessageBoxButton.YesNoCancel,
-                        MessageBoxImage.Question);
-
-                    if (conferma == MessageBoxResult.Cancel)
-                    {
-                        risultatiCancellazione.Add("Operazione annullata dall'utente.");
-                        break;
-                    }
-                    else if (conferma == MessageBoxResult.Yes)
-                    {
-                        try
-                        {
-                            if (short.TryParse(num.Codice, out short id) && id > 0)
-                            {
-                                await _service.DeleteAsync(id);
-                                numerazioniCancellate.Add(num);
-                                risultatiCancellazione.Add($"✓ {num.Descrizione} - Cancellato");
-                            }
-                            else
-                            {
-                                risultatiCancellazione.Add($"✗ {num.Descrizione} - ID non valido");
-                                numerazioniNonCancellate.Add(num);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            risultatiCancellazione.Add($"✗ {num.Descrizione} - Errore: {ex.Message}");
-                            numerazioniNonCancellate.Add(num);
-                        }
-                    }
-                    else
-                    {
-                        risultatiCancellazione.Add($"○ {num.Descrizione} - Saltato");
-                        numerazioniNonCancellate.Add(num);
-                    }
-                }
-
-                foreach (var num in numerazioniCancellate)
-                {
-                    Numerazioni.Remove(num);
-                }
-
-                ElementiSelezionati.Clear();
-                Codice = string.Empty;
-                Descrizione = string.Empty;
-                Sigla = string.Empty;
-                StampaTelefonoCliente = "0";
-                IsDefaultCliente = false;
-                IsDefaultFornitore = false;
-                IsDirty = false;
-                IsInEditMode = false;
-
-                var messaggio = "Riepilogo cancellazione multipla:\n\n" +
-                               string.Join("\n", risultatiCancellazione) +
-                               $"\n\nNumerazioni cancellate: {numerazioniCancellate.Count}\n" +
-                               $"Numerazioni saltate/errori: {numerazioniNonCancellate.Count}";
-
-                MessageBox.Show(messaggio, "Riepilogo Cancellazione",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Errore generale durante la cancellazione multipla: {ex.Message}",
-                    "Errore", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
         public async void AnnullaModifiche()
         {
             if (!IsInEditMode) return;
@@ -510,17 +411,17 @@ namespace Store2Tab.ViewModels
             {
                 if (_currentEntity != null && !string.IsNullOrEmpty(Codice))
                 {
-                    var fresh = await _service.GetByIdAsync(_currentEntity.IdOrdineNumerazione);
+                    var fresh = await _service.GetByIdAsync(_currentEntity.IdDocEmessoNumerazione);
                     if (fresh != null)
                     {
                         IsLoading = true;
                         _currentEntity = fresh;
-                        Codice = fresh.IdOrdineNumerazione.ToString();
-                        Descrizione = fresh.OrdineNumerazione;
+                        Codice = fresh.IdDocEmessoNumerazione.ToString();
+                        Descrizione = fresh.DocEmessoNumerazioneDescrizione;
                         Sigla = fresh.NumerazioneSigla;
-                        IsDefaultCliente = fresh.DefaultCliente == 1;
-                        IsDefaultFornitore = fresh.DefaultFornitore == 1;
-                        StampaTelefonoCliente = fresh.StampaDestinatarioTel.ToString();
+                        DocumentoElettronico = fresh.DocumentoElettronico == 1;
+                        FETipoDoc = fresh.FE_TipoDoc;
+                        DocEmessoTipoStampa = fresh.DocEmessoTipo_Stampa;
                         IsLoading = false;
                     }
                 }
@@ -529,9 +430,9 @@ namespace Store2Tab.ViewModels
                     Codice = string.Empty;
                     Descrizione = string.Empty;
                     Sigla = string.Empty;
-                    StampaTelefonoCliente = "0";
-                    IsDefaultCliente = false;
-                    IsDefaultFornitore = false;
+                    DocumentoElettronico = false;
+                    FETipoDoc = string.Empty;
+                    DocEmessoTipoStampa = string.Empty;
                 }
 
                 IsDirty = false;
@@ -556,7 +457,7 @@ namespace Store2Tab.ViewModels
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    await SalvaNumerazioneAsync();
+                    await SalvaAsync();
                     if (IsInEditMode) return;
                 }
                 else if (result == MessageBoxResult.Cancel)
@@ -569,15 +470,17 @@ namespace Store2Tab.ViewModels
             {
                 IsLoading = true;
                 var results = await _service.SearchAsync(CodiceRicerca, DescrizioneRicerca);
-                Numerazioni.Clear();
+                Documenti.Clear();
                 foreach (var item in results)
                 {
-                    Numerazioni.Add(new NumerazioneOrdiniItem
+                    Documenti.Add(new DocEmessoNumerazioneItem
                     {
-                        Codice = item.IdOrdineNumerazione.ToString(),
-                        Descrizione = item.OrdineNumerazione,
+                        Codice = item.IdDocEmessoNumerazione.ToString(),
+                        Descrizione = item.DocEmessoNumerazioneDescrizione,
                         Sigla = item.NumerazioneSigla,
-                        StampaTelefonoCliente = item.StampaDestinatarioTel.ToString(),
+                        DocumentoElettronico = item.DocumentoElettronico == 1,
+                        FETipoDoc = item.FE_TipoDoc,
+                        DocEmessoTipoStampa = item.DocEmessoTipo_Stampa,
                         IsSelected = false
                     });
                 }
@@ -586,9 +489,9 @@ namespace Store2Tab.ViewModels
                 Codice = string.Empty;
                 Descrizione = string.Empty;
                 Sigla = string.Empty;
-                StampaTelefonoCliente = "0";
-                IsDefaultCliente = false;
-                IsDefaultFornitore = false;
+                DocumentoElettronico = false;
+                FETipoDoc = string.Empty;
+                DocEmessoTipoStampa = string.Empty;
                 IsDirty = false;
                 IsInEditMode = false;
             }
@@ -602,7 +505,7 @@ namespace Store2Tab.ViewModels
             }
         }
 
-        public async void SelezionaNumerazione(string codice, string descrizione, string sigla, string stampaTelefonoCliente)
+        public async void SelezionaNumerazione(string codice)
         {
             try
             {
@@ -612,12 +515,12 @@ namespace Store2Tab.ViewModels
                     _currentEntity = await _service.GetByIdAsync(id);
                     if (_currentEntity != null)
                     {
-                        Codice = _currentEntity.IdOrdineNumerazione.ToString();
-                        Descrizione = _currentEntity.OrdineNumerazione;
+                        Codice = _currentEntity.IdDocEmessoNumerazione.ToString();
+                        Descrizione = _currentEntity.DocEmessoNumerazioneDescrizione;
                         Sigla = _currentEntity.NumerazioneSigla;
-                        IsDefaultCliente = _currentEntity.DefaultCliente == 1;
-                        IsDefaultFornitore = _currentEntity.DefaultFornitore == 1;
-                        StampaTelefonoCliente = _currentEntity.StampaDestinatarioTel.ToString();
+                        DocumentoElettronico = _currentEntity.DocumentoElettronico == 1;
+                        FETipoDoc = _currentEntity.FE_TipoDoc;
+                        DocEmessoTipoStampa = _currentEntity.DocEmessoTipo_Stampa;
                         IsDirty = false;
                         IsInEditMode = false;
                     }
@@ -636,4 +539,30 @@ namespace Store2Tab.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    public class DocEmessoNumerazioneItem : INotifyPropertyChanged
+    {
+        private string _codice = string.Empty;
+        private string _descrizione = string.Empty;
+        private string _sigla = string.Empty;
+        private bool _documentoElettronico;
+        private string _feTipoDoc = string.Empty;
+        private string _stampa = string.Empty;
+        private bool _isSelected;
+
+        public string Codice { get => _codice; set { if (_codice != value) { _codice = value; OnPropertyChanged(); } } }
+        public string Descrizione { get => _descrizione; set { if (_descrizione != value) { _descrizione = value; OnPropertyChanged(); } } }
+        public string Sigla { get => _sigla; set { if (_sigla != value) { _sigla = value; OnPropertyChanged(); } } }
+        public bool DocumentoElettronico { get => _documentoElettronico; set { if (_documentoElettronico != value) { _documentoElettronico = value; OnPropertyChanged(); } } }
+        public string FETipoDoc { get => _feTipoDoc; set { if (_feTipoDoc != value) { _feTipoDoc = value; OnPropertyChanged(); } } }
+        public string DocEmessoTipoStampa { get => _stampa; set { if (_stampa != value) { _stampa = value; OnPropertyChanged(); } } }
+        public bool IsSelected { get => _isSelected; set { if (_isSelected != value) { _isSelected = value; OnPropertyChanged(); } } }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 }
+

@@ -1,61 +1,60 @@
 ﻿using Store2Tab.ViewModels;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Store2Tab.Views
 {
-    /// <summary>
-    /// Classe per gli elementi del DataGrid dei Protocolli Contatori
-    /// </summary>
-    public class ProtocolloContatoreItem
-    {
-        public string Anno { get; set; } = string.Empty;
-        public string ProtocolloDescrizione { get; set; } = string.Empty;
-        public string Contatore { get; set; } = string.Empty;
-    }
-
     public partial class GestioneProtocolliContatoriView : UserControl
     {
+        private ProtocolliContatoriViewModel ViewModel => (ProtocolliContatoriViewModel)DataContext;
+
         public GestioneProtocolliContatoriView()
         {
             InitializeComponent();
             DataContext = new ProtocolliContatoriViewModel();
 
-            // Popola con dati di esempio
-            PopulateDataGrid();
+            // Gestione eventi tastiera
+            this.KeyDown += GestioneProtocolliContatoriView_KeyDown;
+            this.Focusable = true;
+            this.Loaded += (s, e) => this.Focus();
         }
 
-        private void PopulateDataGrid()
+        private void GestioneProtocolliContatoriView_KeyDown(object sender, KeyEventArgs e)
         {
-            var protocolliContatoriEsempio = new List<ProtocolloContatoreItem>
+            switch (e.Key)
             {
-                new ProtocolloContatoreItem { Anno = "2025", ProtocolloDescrizione = "Doc. Emessi", Contatore = "1" },
-                new ProtocolloContatoreItem { Anno = "2025", ProtocolloDescrizione = "Doc. Ricevuti", Contatore = "1" },
-                new ProtocolloContatoreItem { Anno = "2024", ProtocolloDescrizione = "Doc. Emessi", Contatore = "150" },
-                new ProtocolloContatoreItem { Anno = "2024", ProtocolloDescrizione = "Contratti", Contatore = "25" },
-                new ProtocolloContatoreItem { Anno = "2023", ProtocolloDescrizione = "Fatture Elettroniche", Contatore = "500" }
-            };
-
-            foreach (var item in protocolliContatoriEsempio)
-            {
-                ProtocolliContatoriDataGrid.Items.Add(item);
+                case Key.F2: // Salva
+                    if (ViewModel.IsInEditMode)
+                    {
+                        Salva_Click(sender, e);
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.F4: // Cancella
+                    Cancella_Click(sender, e);
+                    e.Handled = true;
+                    break;
+                case Key.F8: // Annulla
+                    if (ViewModel.IsInEditMode)
+                    {
+                        Annulla_Click(sender, e);
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.Escape: // Chiudi form
+                    Window.GetWindow(this)?.Close();
+                    e.Handled = true;
+                    break;
             }
         }
 
-        private void Nuovo_Click(object sender, RoutedEventArgs e)
+        private async void Salva_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is ProtocolliContatoriViewModel viewModel)
+            bool risultato = await ViewModel.SalvaAsync();
+            if (!risultato)
             {
-                viewModel.NuovoProtocolloContatore();
-            }
-        }
-
-        private void Salva_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is ProtocolliContatoriViewModel viewModel)
-            {
-                viewModel.SalvaProtocolloContatore();
+                MessageBox.Show("Errore durante il salvataggio.");
             }
         }
 
@@ -63,45 +62,18 @@ namespace Store2Tab.Views
         {
             if (DataContext is ProtocolliContatoriViewModel viewModel)
             {
-                var result = MessageBox.Show("Sei sicuro di voler cancellare il protocollo contatore selezionato?",
-                    "Conferma Cancellazione", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    viewModel.CancellaProtocolloContatore();
-                }
+                viewModel.Elimina();
             }
         }
 
         private void Annulla_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is ProtocolliContatoriViewModel viewModel)
-            {
-                viewModel.AnnullaModifiche();
-            }
+            ViewModel.AnnullaModifiche();
         }
 
-        private void Cerca_Click(object sender, RoutedEventArgs e)
+        private void Contatore_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (DataContext is ProtocolliContatoriViewModel viewModel)
-            {
-                viewModel.CercaProtocolliContatori();
-            }
-        }
-
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (DataContext is ProtocolliContatoriViewModel viewModel)
-            {
-                if (ProtocolliContatoriDataGrid.SelectedItem is ProtocolloContatoreItem selectedItem)
-                {
-                    viewModel.SelezionaProtocolloContatore(selectedItem.Anno, selectedItem.ProtocolloDescrizione, selectedItem.Contatore);
-
-                    // Aggiorna i campi del pannello dettagli
-                    AnnoTextBox.Text = selectedItem.Anno;
-                    ProtocolloTextBox.Text = selectedItem.ProtocolloDescrizione;
-                    ContatoreTextBox.Text = selectedItem.Contatore;
-                }
-            }
+            ViewModel.OnContatoreModificato();
         }
     }
 }

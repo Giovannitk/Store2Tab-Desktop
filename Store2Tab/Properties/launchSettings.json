@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Store2Tab": {
-      "commandName": "Project",
-      "commandLineArgs": "#/#BANCHE#/#"
+      "commandName": "Project"
     }
   }
 }

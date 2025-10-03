@@ -1,34 +1,37 @@
 ﻿<UserControl x:Class="Store2Tab.Views.GestioneProtocolliContatoriView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Store2Tab.Views">
+             xmlns:conv="clr-namespace:Store2Tab.Converters">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Themes/SharedStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Background="#FF2D2D30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Toolbar -->
             <RowDefinition Height="*"/>
-            <!-- Contenuto principale -->
         </Grid.RowDefinitions>
 
-        <!-- Toolbar con pulsanti -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="35">
-            <Button Name="NuovoButton" Content="F1-Nuovo" Width="80" Margin="5,3" 
-                    Click="Nuovo_Click" Style="{StaticResource ActionButtonStyle}"/>
-            <Button Name="SalvaButton" Content="F2-Salva" Width="80" Margin="5,3" 
-                    Click="Salva_Click" Style="{StaticResource ActionButtonStyle}"/>
-            <Button Name="CancellaButton" Content="F4-Cancella" Width="90" Margin="5,3" 
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF3F3F46" Height="Auto">
+            <Button Content="F2-Salva" Width="80" Margin="5,3" 
+                    Click="Salva_Click" 
+                    IsEnabled="{Binding IsInEditMode}"
+                    Style="{StaticResource ActionButtonStyle}"/>
+            <Button Content="F4-Cancella" Width="90" Margin="5,3" 
                     Click="Cancella_Click" Style="{StaticResource ActionButtonStyle}"/>
-            <Button Name="AnnullaButton" Content="F8-Annulla" Width="90" Margin="5,3" 
-                    Click="Annulla_Click" Style="{StaticResource ActionButtonStyle}"/>
+            <Button Content="F8-Annulla" Width="90" Margin="5,3" 
+                    Click="Annulla_Click"
+                    IsEnabled="{Binding IsInEditMode}"
+                    Style="{StaticResource ActionButtonStyle}"/>
         </StackPanel>
 
         <!-- Contenuto principale -->
@@ -38,14 +41,22 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- DataGrid protocolli contatori (sinistra) -->
-            <DataGrid Grid.Column="0" Name="ProtocolliContatoriDataGrid" 
-                      AutoGenerateColumns="False" CanUserAddRows="False"
-                      Background="#FF3F3F46" Foreground="White" 
-                      GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                      BorderBrush="#FF434346" BorderThickness="1"
-                      SelectionChanged="DataGrid_SelectionChanged"
-                      RowBackground="#FF3F3F46" AlternatingRowBackground="#FF2D2D30">
+            <!-- DataGrid -->
+            <DataGrid Grid.Column="0" 
+                      Name="ProtocolliContatoriDataGrid"
+                      ItemsSource="{Binding ProtocolliContatori}"
+                      SelectedItem="{Binding Selezionato, Mode=TwoWay}"
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False"
+                      IsEnabled="{Binding IsInEditMode, Converter={StaticResource InverseBooleanConverter}}"
+                      Background="#FF3F3F46" 
+                      Foreground="White" 
+                      GridLinesVisibility="Horizontal" 
+                      HeadersVisibility="Column"
+                      BorderBrush="#FF434346" 
+                      BorderThickness="1"
+                      RowBackground="#FF3F3F46" 
+                      AlternatingRowBackground="#FF2D2D30">
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
@@ -59,42 +70,72 @@
                 </DataGrid.ColumnHeaderStyle>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Anno" Binding="{Binding Anno}" Width="60"/>
-                    <DataGridTextColumn Header="Protocollo (descrizione)" 
-                                        Binding="{Binding ProtocolloDescrizione}" Width="200"/>
-                    <DataGridTextColumn Header="Contatore" Binding="{Binding Contatore}" Width="80"/>
+                    <DataGridTextColumn Header="Anno" 
+                                        Binding="{Binding Esercizio}" 
+                                        Width="60"/>
+                    <DataGridTextColumn Header="Protocollo" 
+                                        Binding="{Binding NomeProtocollo}" 
+                                        Width="200"/>
+                    <DataGridTextColumn Header="Contatore" 
+                                        Binding="{Binding Contatore}" 
+                                        Width="80"/>
                 </DataGrid.Columns>
-
-                <DataGrid.Items>
-                </DataGrid.Items>
             </DataGrid>
 
-            <!-- Pannello dettagli (destra) -->
-            <StackPanel Grid.Column="1" Margin="15,0,0,0">
+            <!-- Pannello dettagli -->
+            <Grid Grid.Column="1" Margin="15,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
                 <!-- Anno -->
-                <GroupBox Header="Anno" Style="{StaticResource ModernGroupBox}" 
+                <GroupBox Grid.Row="0" Header="Anno" 
+                          Style="{StaticResource ModernGroupBox}" 
                           Height="70" Margin="0,0,0,15">
-                    <TextBox Name="AnnoTextBox" Height="25" Width="100" 
-                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                    <TextBox Height="25" Width="100" 
+                             HorizontalAlignment="Left" 
+                             VerticalAlignment="Top"
+                             Text="{Binding Esercizio}"
+                             IsReadOnly="True"
                              Style="{StaticResource ModernTextBox}"/>
                 </GroupBox>
 
                 <!-- Protocollo -->
-                <GroupBox Header="Protocollo" Style="{StaticResource ModernGroupBox}" 
+                <GroupBox Grid.Row="1" Header="Protocollo" 
+                          Style="{StaticResource ModernGroupBox}" 
                           Height="70" Margin="0,0,0,15">
-                    <TextBox Name="ProtocolloTextBox" Height="25" 
-                             VerticalAlignment="Top" Style="{StaticResource ModernTextBox}"/>
-                </GroupBox>
-
-                <!-- Contatore -->
-                <GroupBox Header="Contatore" Style="{StaticResource ModernGroupBox}" 
-                          Height="70" Margin="0,0,0,15">
-                    <TextBox Name="ContatoreTextBox" Height="25" Width="100"
-                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                    <TextBox Height="25" 
+                             VerticalAlignment="Top"
+                             Text="{Binding NomeProtocollo}"
+                             IsReadOnly="True"
                              Style="{StaticResource ModernTextBox}"/>
                 </GroupBox>
 
+                <!-- Contatore -->
+                <GroupBox Grid.Row="2" Header="Contatore" 
+                          Style="{StaticResource ModernGroupBox}" 
+                          Height="70">
+                    <TextBox Height="25" Width="100"
+                             HorizontalAlignment="Left" 
+                             VerticalAlignment="Top"
+                             Text="{Binding Contatore, UpdateSourceTrigger=PropertyChanged}"
+                             TextChanged="Contatore_TextChanged"
+                             Style="{StaticResource ModernTextBox}"/>
+                </GroupBox>
+            </Grid>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="2" 
+              Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Caricamento..." 
+                           Foreground="White" 
+                           FontSize="16" 
+                           FontWeight="Bold"/>
             </StackPanel>
         </Grid>
     </Grid>
